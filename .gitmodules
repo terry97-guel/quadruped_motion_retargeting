@@ -1,0 +1,15 @@
+[submodule "mjtools"]
+	path = mjtools
+	url = https://github.com/terry97-guel/mjtools.git
+[submodule "robot_menagerie"]
+	path = robot_menagerie
+	url = https://github.com/terry97-guel/robot_menagerie
+[submodule "spatial_motion_retargeting"]
+	path = spatial_motion_retargeting
+	url = https://github.com/terry97-guel/spatial_motion_retargeting.git
+[submodule "quadruped_motion_mjpc"]
+	path = quadruped_motion_mjpc
+	url = https://github.com/terry97-guel/quadruped_motion_mjpc.git
+[submodule "MANN-menagerie"]
+	path = MANN-menagerie
+	url = https://github.com/terry97-guel/MANN-menagerie.git

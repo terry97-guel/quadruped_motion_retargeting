@@ -55,7 +55,7 @@ cd ..
 
 ```
 cd quadruped_motion_mjpc/python
-python install setup.py --install
+python setup_new.py install
 cd ../..
 ```
 Beware: Unlike other subpackages, [quadruped_motion_mjpc](./quadruped_motion_mjpc/) involves compiling c++ code. Therefore, make sure to **re-install** with the above code block.

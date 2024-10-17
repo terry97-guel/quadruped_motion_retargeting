@@ -88,7 +88,7 @@ from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 smr_info  = QuadrupedSMRInfo(model, data, only_foot=True)
 smr_agent = SMR(model, data, smr_info)
 # %%
-
+# read trajectory json
 def read_traj_json(traj_json, PLOT):
     base_quat_list = []
     base_pos_list = []
@@ -137,6 +137,7 @@ def read_traj_json(traj_json, PLOT):
 
 base_quat_array, base_pos_array, global_keypoint_dict, time_array = read_traj_json(traj_json, PLOT=True)
 # %%
+# get local foot position
 def get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True):
     foot_pos_dict = {}
     foot_offset = np.array([-0.04, 0, 0])
@@ -188,6 +189,7 @@ def get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True):
 foot_pos_dict = get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True)
 
 # %%
+# site_target_dict to build ik_target
 def get_site_target_dict(foot_pos_dict):
     site_target_dict = foot_pos_dict
 
@@ -202,6 +204,7 @@ def get_site_target_dict(foot_pos_dict):
 site_target_dict = get_site_target_dict(foot_pos_dict)
 
 # %%
+# read contact.json to build ik_target
 def get_contact_array(PLOT = True):
     with open(args.contact_json_path) as f:
         contact_json = json.load(f)
@@ -246,6 +249,7 @@ smr_agent.set_ik_target(ik_target_holder)
 smr_agent.naive_retarget(viewer)
 
 # %%
+# Directly transfer base movement
 q_array_NMR = smr_agent.naive_retarget_result.copy()
 q_array_NMR[:,:3] = base_pos_array
 q_array_NMR[:,3:7] = base_quat_array

@@ -6,7 +6,6 @@ from robot_menagerie import ASSET_XML_DICT
 
 from smr.agent import SMR
 from smr.ik_target_holder import IKTargetHolder
-# from mjmr.motion_holder import IKTargetHolder
 
 import numpy as np
 import time
@@ -103,16 +102,9 @@ base_quat_array, base_pos_array, global_keypoint_dict, time_array = read_traj_js
 # %%
 # get local foot position
 def get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True):
-    foot_pos_dict = {}
-
     reset(model, data)
-    hip_home_pos_dict = dict(
-        FL_hip_site = data.site_xpos[smr_info.id.FL_thigh_site].copy(),
-        FR_hip_site = data.site_xpos[smr_info.id.FR_thigh_site].copy(),
-        RL_hip_site = data.site_xpos[smr_info.id.RL_thigh_site].copy(),
-        RR_hip_site = data.site_xpos[smr_info.id.RR_thigh_site].copy(),
-    )
-    
+
+    foot_pos_dict = {}
     for frame_i in range(cfg.max_frame):
         for id_ in range(4):
             foot_name = smr_info.foot_names[id_]

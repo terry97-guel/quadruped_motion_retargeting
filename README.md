@@ -58,7 +58,7 @@ cd quadruped_motion_mjpc/python
 python setup_new.py install
 cd ../..
 ```
-Beware: Unlike other subpackages, [quadruped_motion_mjpc](./quadruped_motion_mjpc/) involves compiling c++ code. Therefore, make sure to **re-install** with the above code block.
+Beware: Unlike other subpackages, [quadruped_motion_mjpc](./quadruped_motion_mjpc/) involves compiling c++ code. Therefore, if you change code in c++ side, make sure to **re-install** with `python setup_new.py install`.
 
 # Main function
 - kinematic_mr.py: Use spatial motion retargeting to transfer motion at kinematic level

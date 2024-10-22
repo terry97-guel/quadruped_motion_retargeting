@@ -1,7 +1,7 @@
 # %%
 from mjtools import get_body_id, get_site_id, plot_sphere, reset, get_mr_info, R2quat, get_mujoco_contact_boolean, plot_quadruped_contact_schedule, IOU, calculate_foot_slip, get_vel_contact_boolean, quat2R
 from smr.task.Quadruped.info import QuadrupedSMRInfo
-from mann import MANN_BASE_PATH
+from motion_menagerie.mann import MANN_BASE_PATH
 
 from robot_menagerie import ASSET_XML_DICT
 
@@ -17,13 +17,13 @@ from matplotlib import pyplot as plt
 import json
 
 
-ROBOT = "A1Task"
+ROBOT = "go2_task"
 TASK = f"{ROBOT}Motion"
 MOTION = "D1_009_KAN01_002"
 # MOTION = "D1_047z_KAN01_005"
 # MOTION = "D1_009_KAN01_001"
 # MOTION = "D1_010_KAN01_004"
-PLOT = False
+PLOT = True
 
 xml_path = ASSET_XML_DICT[ROBOT]
 model = mujoco.MjModel.from_xml_path(xml_path.as_posix())
@@ -135,7 +135,7 @@ def read_traj_json(traj_json, PLOT):
     
     return base_quat_array, base_pos_array, global_keypoint_dict, time_array
 
-base_quat_array, base_pos_array, global_keypoint_dict, time_array = read_traj_json(traj_json, PLOT=True)
+base_quat_array, base_pos_array, global_keypoint_dict, time_array = read_traj_json(traj_json, PLOT=PLOT)
 # %%
 # get local foot position
 def get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True):
@@ -186,7 +186,7 @@ def get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True):
             viewer.render()
     return foot_pos_dict
 
-foot_pos_dict = get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=True)
+foot_pos_dict = get_foot_pos_dict(global_keypoint_dict, base_quat_array, PLOT=PLOT)
 
 # %%
 # site_target_dict to build ik_target
@@ -237,7 +237,7 @@ def get_contact_array(PLOT = True):
 
     return contact_schedule
 
-contact_array = get_contact_array(PLOT=True)
+contact_array = get_contact_array(PLOT=PLOT)
 
 
 # %%
@@ -250,15 +250,91 @@ smr_agent.naive_retarget(viewer)
 
 # %%
 # Directly transfer base movement
-q_array_NMR = smr_agent.naive_retarget_result.copy()
-q_array_NMR[:,:3] = base_pos_array
-q_array_NMR[:,3:7] = base_quat_array
+qpos_array_NMR = smr_agent.naive_retarget_result.copy()
+qpos_array_NMR[:,:3] = base_pos_array
+qpos_array_NMR[:,3:7] = base_quat_array
 
-for i in range(len(q_array_NMR)):
-    data.qpos = q_array_NMR[i]
+for i in range(len(qpos_array_NMR)):
+    data.qpos = qpos_array_NMR[i]
     mujoco.mj_forward(model, data)
-    viewer.cam.lookat = q_array_NMR[i][:3]
+    viewer.cam.lookat = qpos_array_NMR[i][:3]
     viewer.render()
 
 # %%
-smr_agent.spatial_retarget(reference_states=q_array_NMR, viewer=viewer)
+smr_agent.spatial_retarget(reference_states=qpos_array_NMR, viewer=viewer)
+
+# %%
+qpos_array_SMR = smr_agent.spatial_retarget_result.copy()
+
+# %%
+for qpos in qpos_array_SMR:
+    data.qpos = qpos
+    mujoco.mj_forward(model, data)
+    viewer.cam.lookat = qpos[:3]
+    viewer.render()
+    
+# %%
+foot_height_post_scale = 1.3
+
+site_target_dict = {}
+for qpos in qpos_array_SMR:
+    data.qpos = qpos
+    mujoco.mj_forward(model, data)
+    for id_ in range(4):
+        foot_name = smr_info.foot_names[id_]
+        foot_pos = data.site_xpos[smr_info.id.foot_ids[id_]].copy()
+        if foot_name not in site_target_dict.keys():
+            site_target_dict[foot_name] = []
+            
+        foot_pos[2] = foot_pos[2] * foot_height_post_scale
+        hip_pos = data.site_xpos[smr_info.id.hip_ids[id_]].copy()
+        
+        hip_to_foot_global = foot_pos - hip_pos
+        hip_to_foot_local = np.dot(quat2R(qpos[3:7]).T, hip_to_foot_global)
+        foot_local = hip_to_foot_local + smr_info.home_hip_xpos[id_]
+        site_target_dict[foot_name].append(foot_local)
+        
+        hip_name = smr_info.hip_names[id_]
+        if hip_name not in site_target_dict.keys():
+            site_target_dict[hip_name] = []
+        site_target_dict[hip_name].append(smr_info.home_hip_xpos[id_])
+
+# %%
+# Set ik target and Solve
+time_stamped_target = TimeStampedTarget(time_array, site_target_dict, contact_array=contact_array)
+ik_target_holder = IKTargetHolder(model, data, smr_info).from_time_stamped_target(time_stamped_target)
+
+smr_agent.set_ik_target(ik_target_holder)
+smr_agent.naive_retarget(viewer)
+
+# %%
+qpos_array_NMR = smr_agent.naive_retarget_result.copy()
+qpos_array_NMR[:,:7] = qpos_array_SMR[:,:7]
+
+for i in range(len(qpos_array_NMR)):
+    data.qpos = qpos_array_NMR[i]
+    mujoco.mj_forward(model, data)
+    viewer.cam.lookat = qpos_array_NMR[i][:3]
+    viewer.render()
+
+# %%
+smr_agent.spatial_retarget(reference_states=qpos_array_NMR, viewer=viewer)
+
+# %%
+qpos_array_lifted_foot = smr_agent.spatial_retarget_result.copy()
+for qpos in qpos_array_lifted_foot:
+    data.qpos = qpos
+    mujoco.mj_forward(model, data)
+    viewer.cam.lookat = qpos[:3]
+    
+    for _ in range(3):
+        viewer.render()
+# %%
+for qpos in qpos_array_SMR.copy():
+    data.qpos = qpos
+    mujoco.mj_forward(model, data)
+    viewer.cam.lookat = qpos[:3]
+    
+    for _ in range(3):
+        viewer.render()
+# %%

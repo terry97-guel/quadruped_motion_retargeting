@@ -1,6 +1,6 @@
-[submodule "mjtools"]
-	path = mjtools
-	url = https://github.com/terry97-guel/mjtools.git
+[submodule "mj_tools"]
+	path = mj_tools
+	url = https://github.com/terry97-guel/mj_tools.git
 [submodule "robot_menagerie"]
 	path = robot_menagerie
 	url = https://github.com/terry97-guel/robot_menagerie
@@ -10,6 +10,6 @@
 [submodule "quadruped_motion_mjpc"]
 	path = quadruped_motion_mjpc
 	url = https://github.com/terry97-guel/quadruped_motion_mjpc.git
-[submodule "MANN-menagerie"]
-	path = MANN-menagerie
-	url = https://github.com/terry97-guel/MANN-menagerie.git
+[submodule "motion_menagerie"]
+	path = motion_menagerie
+	url = https://github.com/terry97-guel/motion_menagerie.git

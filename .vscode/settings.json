@@ -1,9 +1,0 @@
-{
-    "python.analysis.extraPaths": [
-        ".",
-        "./spatial_motion_retargeting",
-        "./MANN-menagerie",
-        "./robot_menagerie"
-    ],
-    "cmake.sourceDirectory": "/Users/taerimyoon/Rilab_2024/quadruped_motion_retargeting/quadruped_motion_mjpc/build_py/_deps/dm_control-subbuild"
-}

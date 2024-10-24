@@ -14,7 +14,7 @@ import mujoco_viewer
 from matplotlib import pyplot as plt
 import json
 
-from kinematic_mr_cfg import A1Cfg as cfg
+from kinematic_mr_cfg import cfg
 
 xml_path = ASSET_XML_DICT[cfg.ROBOT]
 model = mujoco.MjModel.from_xml_path(xml_path.as_posix())

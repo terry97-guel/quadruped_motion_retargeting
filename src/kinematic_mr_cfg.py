@@ -13,17 +13,19 @@ KEY_MAP = {
 }
 
 class CommonCfg:
-    MOTION = "D1_009_KAN01_002" 
+    MOTION = "D1_007_KAN01_001" 
+    
     # MOTION = "D1_047z_KAN01_005"
     # MOTION = "D1_009_KAN01_001"
     # MOTION = "D1_010_KAN01_004"
     
     KEY_MAP = KEY_MAP
-    
-    
+        
     contact_json_path = MANN_BASE_PATH/"data"/f"{MOTION}_contact.json"
     traj_json_path = MANN_BASE_PATH/"data"/f"{MOTION}_traj.json"
-    dt = 1/60
+    
+    fps = 60
+    dt = 1/fps
     max_frame = -1
 
     PLOT = True

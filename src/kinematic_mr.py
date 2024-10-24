@@ -191,7 +191,7 @@ def get_contact_array(PLOT = True):
 
     return contact_schedule
 
-contact_array = get_contact_array(PLOT=cfg.PLOT)
+contact_array = get_contact_array(PLOT=False)
 
 # %%
 # Set ik target and Solve
@@ -284,11 +284,15 @@ if cfg.PLOT:
 # %%
 # Save motion
 from motion_menagerie import MotionIO
-motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_lifted_foot)
+if cfg.dataset == "MANN":
+    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_SMR)
+elif cfg.dataset == "MANN_LIFTED":
+    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_lifted_foot)
+else:
+    raise ValueError("Invalid dataset")
 
 # %%
 # Save to xml file (for dynamic_mr)
-from motion_menagerie.mann import MANN_BASE_PATH
-motion_io.smart_export_xml(MANN_BASE_PATH, cfg.ROBOT, cfg.MOTION, dt=cfg.dt, USE_FD=True)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, dt=cfg.dt, USE_FD=True)
 
 # %%

@@ -13,12 +13,8 @@
 # limitations under the License.
 
 # %%
-
-# %%
 from mujoco_mpc import agent as agent_lib
 
-
-# %%
 import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
@@ -30,29 +26,28 @@ from mujoco_mpc import agent as agent_lib
 # from mjtg.io import MotionIO
 from motion_menagerie.mann import MANN_BASE_PATH
 from mujoco_viewer import MujocoViewer
-from mjtools import get_site_id, plot_sphere, reset
+from mjtools import get_site_id, plot_sphere, reset, reset_with_mocap
 
 
 # %%
 from pathlib import Path
-MJPC_TASK_PATH = Path(__file__).parent/ 'quadruped_motion_mjpc/build_py/mjpc/tasks'
+MJPC_TASK_PATH = Path(__file__).parent.parent/ 'quadruped_motion_mjpc/build/mjpc/tasks'
 MJPC_TASK_PATH.exists()
 
 # %%
 # Choose ROBOT and MOTION here
-ROBOT = "go2"
-MOTION = "D1_009_KAN01_002"
-# MOTION = "D1_025_KAN01_001"
-# MOTION = "D1_049_KAN01_001"
+ROBOT = "a1_task"
+ROBOT_CLASS = "Quadruped"
+MOTION = "Stand"
 
-name = str.replace(MOTION, "D1_","")
-name = str.replace(name, "KAN01_","")
+robot_name = ROBOT.split("_")[0]
+robot_name = robot_name.capitalize()
 
 # %%
 ROBOT = ROBOT.lower()
 # model
 model_path = (
-    MJPC_TASK_PATH/f"{ROBOT}Motion/{ROBOT}_task.xml"
+    MJPC_TASK_PATH/f"model_files/robots/Quadruped/{robot_name}/{ROBOT}.xml"
 )
 model = mujoco.MjModel.from_xml_path(str(model_path))
 
@@ -60,9 +55,23 @@ model = mujoco.MjModel.from_xml_path(str(model_path))
 data = mujoco.MjData(model)
 planner_run_per_step = 1
 
+# %%
 # agent
-agent = agent_lib.Agent(task_id=f"{ROBOT.capitalize()}Motion", model=model)
+agent = agent_lib.Agent(task_id=f"{robot_name}Motion", model=model)
 
+# %%
+agent.get_all_modes()
+
+# %%
+agent.get_cost_term_values()
+
+# %%
+agent.reset()
+
+# %%
+agent.planner_step()
+
+# %%
 try:
     viewer.close()
 except Exception:
@@ -72,39 +81,31 @@ viewer = MujocoViewer(
         width=1200,height=800,hide_menus=True
 )
 
+reset(model, data)
+viewer.cam.lookat = data.qpos[:3]
+viewer.render()
+
+agent.set_mode(MOTION)
 # %%
-# MOTION = "PushUp"
-agent.set_mode(name)
+from motion_menagerie.mann_lifted import MANN_LIFTED_BASE_PATH as MOTION_BASE_PATH
+motion_info_from_path = (MOTION_BASE_PATH/f"kinematic_processed_data/{ROBOT}/motion_info.json").resolve()
 
 # %%
-MOTION_INFO_LIST = [
-    {"name": "Stand", "length": 240, "fps": 30},
-    {"name": "PushUp", "length": 240, "fps": 30},
-    {"name": "Bound", "length": 240, "fps": 30},
-    {"name": "BoundFast", "length": 240, "fps": 30},
-    {"name": "BoundFaster", "length": 240, "fps": 30},
-    {"name": "009_001", "length": 546, "fps": 60},
-    {"name": "010_004", "length": 358, "fps": 60},
-    {"name": "047z_005", "length": 2749, "fps": 60},
-    {"name": "010_002", "length": 153, "fps": 60},
-    {"name": "010_003", "length": 201, "fps": 60},
-    {"name": "007_001", "length": 499, "fps": 60},
-    {"name": "009_002", "length": 306, "fps": 60},
-    {"name": "025_001", "length": 371, "fps": 60},
-    {"name": "049_001", "length": 385, "fps": 60},
-    # {"name": "a1_stand", "length":499, "fps": 50}
-]
+import json
+with open(motion_info_from_path, "r") as f:
+    motion_info = json.load(f)
 
-MOTION_INDEX_DICT = {}
-for i, info in enumerate(MOTION_INFO_LIST):
-    MOTION_INDEX_DICT[info["name"]] = i
-mode = MOTION_INDEX_DICT[name]
+motion_names = list(motion_info.keys())
+motion_names.sort()
+
+mode = motion_names.index(MOTION)
 
 # %%
 def get_mocap_id(mode):
     mocap_id = 0
-    for prev_mode in range(mode):
-        mocap_id += MOTION_INFO_LIST[prev_mode]["length"]
+    for mode_i in range(mode):
+        motion_name = motion_names[mode_i]
+        mocap_id += motion_info[motion_name]["length"]
     return mocap_id
 
 mocap_id = get_mocap_id(mode)
@@ -128,18 +129,18 @@ def get_contact(model, data, foot_names_ls):
     return np.array(contact_ls, dtype=np.bool)
         
 # %%
-dt=1/MOTION_INFO_LIST[mode]['fps']
-reset(model, data, mocap_id, INIT_QVEL=True)
+dt=1/motion_info[MOTION]['fps']
+reset_with_mocap(model, data, mocap_id, INIT_QVEL=True)
 viewer.render()
 
 # %%
 agent.reset()
-reset(model, data, mocap_id, INIT_QVEL=True)
+reset_with_mocap(model, data, mocap_id, INIT_QVEL=True)
 viewer.render()
 
 # rollout horizon
-fps = MOTION_INFO_LIST[mode]['fps']
-frame_num = MOTION_INFO_LIST[mode]['length']
+fps = motion_info[MOTION]['fps']
+frame_num = motion_info[MOTION]['length']
 motion_time = frame_num / fps
 T = int(motion_time /model.opt.timestep)
 
@@ -174,7 +175,7 @@ FPS = 1.0 / model.opt.timestep
 t = 0
 # %%
 # simulate
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 t_start = t
 
@@ -214,8 +215,8 @@ for t in tqdm(range(t_start, T - 1)):
 
     # get costs
     cost_total[t] = agent.get_total_cost()
-    for i, c in enumerate(agent.get_cost_term_values().items()):
-        cost_terms[i, t] = c[1]
+    # for i, c in enumerate(agent.get_cost_term_values().items()):
+    #     cost_terms[i, t] = c[1]
 
     # plot target
     data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)

@@ -36,9 +36,9 @@ MJPC_TASK_PATH.exists()
 
 # %%
 # Choose ROBOT and MOTION here
-ROBOT = "a1_task"
+ROBOT = "go2_task"
 ROBOT_CLASS = "Quadruped"
-MOTION = "Stand"
+MOTION = "D1_007_KAN01_001"
 
 robot_name = ROBOT.split("_")[0]
 robot_name = robot_name.capitalize()
@@ -56,6 +56,9 @@ data = mujoco.MjData(model)
 planner_run_per_step = 1
 
 # %%
+model.nmocap
+
+# %%
 # agent
 agent = agent_lib.Agent(task_id=f"{robot_name}Motion", model=model)
 
@@ -70,6 +73,9 @@ agent.reset()
 
 # %%
 agent.planner_step()
+
+# %%
+agent.set_mode(MOTION)
 
 # %%
 try:

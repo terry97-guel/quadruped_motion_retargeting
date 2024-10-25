@@ -1,5 +1,5 @@
 # %%
-from mjtools import get_body_id, get_site_id, plot_sphere, reset, get_mr_info, R2quat, get_mujoco_contact_boolean, plot_quadruped_contact_schedule, IOU, calculate_foot_slip, get_vel_contact_boolean, quat2R, plot_robot
+from mjtools import get_body_id, get_site_id, plot_sphere, reset, get_mr_info, R2quat, get_mujoco_contact_boolean, plot_quadruped_contact_schedule, IOU, calculate_foot_slip, get_vel_contact_boolean, quat2R, plot_robot, get_joint_id, qpos_index_from_names
 from smr.task.Quadruped.info import QuadrupedSMRInfo
 
 from robot_menagerie import ASSET_XML_DICT
@@ -283,16 +283,20 @@ if cfg.PLOT:
 
 # %%
 # Save motion
-from motion_menagerie import MotionIO
-if cfg.dataset == "MANN":
-    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_SMR)
-elif cfg.dataset == "MANN_LIFTED":
-    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_lifted_foot)
-else:
-    raise ValueError("Invalid dataset")
+from motion_menagerie import MotionIO, get_MR_json_path
+qpos_array_save = qpos_array_SMR
+if cfg.dataset.lower() in "lifted":
+    qpos_array_save = qpos_array_lifted_foot
+
+# Save to xml file (for MJPC)
+motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=cfg.dt, USE_FD=True)
 
 # %%
-# Save to xml file (for dynamic_mr)
-motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, dt=cfg.dt, USE_FD=True)
+# reindex for CRL
+qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
+# Save to json file (for CRL)
+motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=cfg.dt)
 
 # %%

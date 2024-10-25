@@ -26,8 +26,9 @@ from mujoco_mpc import agent as agent_lib
 # from mjtg.io import MotionIO
 from motion_menagerie.mann import MANN_BASE_PATH
 from mujoco_viewer import MujocoViewer
-from mjtools import get_site_id, plot_sphere, reset, reset_with_mocap
+from mjtools import get_site_id, plot_sphere, reset, reset_with_mocap, plot_robot
 
+from dynamic_mr_cfg import cfg
 
 # %%
 from pathlib import Path
@@ -35,19 +36,11 @@ MJPC_TASK_PATH = Path(__file__).parent.parent/ 'quadruped_motion_mjpc/build/mjpc
 MJPC_TASK_PATH.exists()
 
 # %%
-# Choose ROBOT and MOTION here
-ROBOT = "go2_task"
-ROBOT_CLASS = "Quadruped"
-MOTION = "D1_007_KAN01_001"
-
-robot_name = ROBOT.split("_")[0]
-robot_name = robot_name.capitalize()
-
-# %%
-ROBOT = ROBOT.lower()
 # model
+robot_name = cfg.ROBOT.split("_")[0]
+robot_name = robot_name.capitalize()
 model_path = (
-    MJPC_TASK_PATH/f"model_files/robots/Quadruped/{robot_name}/{ROBOT}.xml"
+    MJPC_TASK_PATH/f"model_files/robots/Quadruped/{robot_name}/{cfg.ROBOT}.xml"
 )
 model = mujoco.MjModel.from_xml_path(str(model_path))
 
@@ -56,26 +49,9 @@ data = mujoco.MjData(model)
 planner_run_per_step = 1
 
 # %%
-model.nmocap
-
-# %%
 # agent
 agent = agent_lib.Agent(task_id=f"{robot_name}Motion", model=model)
-
-# %%
-agent.get_all_modes()
-
-# %%
-agent.get_cost_term_values()
-
-# %%
-agent.reset()
-
-# %%
-agent.planner_step()
-
-# %%
-agent.set_mode(MOTION)
+agent.set_mode(cfg.MOTION)
 
 # %%
 try:
@@ -91,20 +67,17 @@ reset(model, data)
 viewer.cam.lookat = data.qpos[:3]
 viewer.render()
 
-agent.set_mode(MOTION)
-# %%
-from motion_menagerie.mann_lifted import MANN_LIFTED_BASE_PATH as MOTION_BASE_PATH
-motion_info_from_path = (MOTION_BASE_PATH/f"kinematic_processed_data/{ROBOT}/motion_info.json").resolve()
+agent.set_mode(cfg.MOTION)
 
 # %%
 import json
-with open(motion_info_from_path, "r") as f:
+with open(cfg.motion_info_from_path, "r") as f:
     motion_info = json.load(f)
 
 motion_names = list(motion_info.keys())
 motion_names.sort()
 
-mode = motion_names.index(MOTION)
+mode = motion_names.index(cfg.MOTION)
 
 # %%
 def get_mocap_id(mode):
@@ -135,7 +108,7 @@ def get_contact(model, data, foot_names_ls):
     return np.array(contact_ls, dtype=np.bool)
         
 # %%
-dt=1/motion_info[MOTION]['fps']
+dt=1/motion_info[cfg.MOTION]['fps']
 reset_with_mocap(model, data, mocap_id, INIT_QVEL=True)
 viewer.render()
 
@@ -145,13 +118,13 @@ reset_with_mocap(model, data, mocap_id, INIT_QVEL=True)
 viewer.render()
 
 # rollout horizon
-fps = motion_info[MOTION]['fps']
-frame_num = motion_info[MOTION]['length']
+fps = motion_info[cfg.MOTION]['fps']
+frame_num = motion_info[cfg.MOTION]['length']
 motion_time = frame_num / fps
 T = int(motion_time /model.opt.timestep)
 
 extra_step_interval = int(0.5 / model.opt.timestep)
-extra_step_multiplier = 10
+extra_step_multiplier = 5
 
 # trajectories
 qpos_array = np.zeros((T, model.nq))
@@ -208,14 +181,10 @@ for t in tqdm(range(t_start, T - 1)):
         for _ in range(num_steps):
             agent.planner_step()
     else:
-        num_steps = int(1 / planner_run_per_step_)
-        if t % num_steps == 0:
+        steps_every = int(1 / planner_run_per_step_)
+        if t % steps_every == 0:
             agent.planner_step()
 
-    # if t % 10 == 0:
-    #     agent.planner_step()
-
-    # set ctrl from agent policy
     data.ctrl = agent.get_action()
     ctrl_array[t] = data.ctrl
 
@@ -248,29 +217,20 @@ for t in tqdm(range(t_start, T - 1)):
         viewer.render()
 
 # %%
-for t in range(T):
-    if t %10==0:
-        viewer.cam.lookat = data.qpos[:3]
-        data.qpos = qpos_array[t]
-        data.mocap_pos = mpos_array[t]
-        # viewer.cam.lookat = data.qpos[:3]
-        mujoco.mj_forward(model, data)
+plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array, lookat_site_idr=get_site_id(model, "trunk_site"), sphere_site_ids=[get_site_id(model, foot_name+"_site") for foot_name in foot_names_ls], PLOT_EVERY=10)
 
-        for foot_i, foot_name in enumerate(foot_names_ls):
-            foot_rgba = [1,0,0,0.5] if contact_array[t][foot_i] else [0,1,0,0.5]
-            plot_sphere(viewer, p=data.site_xpos[get_site_id(model, foot_name+"_site")], r=0.05, rgba=foot_rgba)
-        viewer.render()
-# # %%
-# dt_sim = model.opt.timestep
-# save_every = 1
+# %%
+from mjtools import qpos_index_from_names
+from motion_menagerie import get_MR_json_path, MotionIO
 
-# motionIO = MotionIO(model, data, viewer=viewer).set_qpos(qpos_array, qvel_array, mpos_array)
+motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True)
 
-# output_name= MANN_BASE_PATH/f"processed_data/xml/{ROBOT}/{MOTION}.xml"
-# output_name.parent.mkdir(parents=True, exist_ok=True)
-# motionIO.export_xml(XML_PATH=output_name,  RENDER_EVERY=10, dt=dt_sim*save_every)
+# %%
+qpos_array_save = qpos_array
+qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
+motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
 
-# # %%
-# from mann import MANN_BASE_PATH
-# output_name = MANN_BASE_PATH/f"processed_data/json/{ROBOT}/{MOTION}.json"
-# motionIO.export_json(output_name, qpos_array, qvel_array, dt_sim)
+
+# %%

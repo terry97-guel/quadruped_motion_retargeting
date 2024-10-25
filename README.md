@@ -1,6 +1,6 @@
 # Requirements
 ## Python 
-- Recommanded python version: 3.11.9 (Compatible to mujoco-mpc repo) 
+- Recommanded python version: 3.11.9 (Compatible to [motion_mjpc](https://github.com/terry97-guel/motion_mjpc) repo) 
 - Tested python version: 3.11.9, 3.8.13 
 
 Some mujoco functions & plotting functions are not compatible to some python3 versions. It's generally okay, but if you have trouble plotting, try another python versions, mujoco-python-viewer, or mujoco.  (Currently, requirement.txt is set as mujoco-python-viewer== 0.1.4, mujoco==3.1.6).
@@ -10,7 +10,7 @@ Some mujoco functions & plotting functions are not compatible to some python3 ve
 - [robot_menagerie](https://github.com/terry97-guel/robot_menagerie): XML files commonly used through out.
 - [spatial_motion_retargeting](https://github.com/terry97-guel/spatial_motion_retargeting): Retargets motion for floating-base system at kinematic level.
 - [MANN-Menagerie](https://github.com/terry97-guel/MANN-menagerie): Dataset introduced in paper [Mode-adaptive neural networks for quadruped motion control](https://dl.acm.org/doi/10.1145/3197517.3201366)
-
+- [motion_mjpc](https://github.com/terry97-guel/motion_mjpc): MPC package to refine motions, which is built on [mujoco-mpc](https://github.com/google-deepmind/mujoco_mpc)
 # Installation 
 There are two different installation methods, depending on your purpose.
 
@@ -53,12 +53,13 @@ cd ..
 ```
 
 ```bash
-cd quadruped_motion_mjpc/python
-python setup_new.py install
+cd motion_mjpc/python
+python setup_motion.py build_ext
+python setup_motion.py install
 cd ../..
 ```
-Beware: Unlike other subpackages, [quadruped_motion_mjpc](./quadruped_motion_mjpc/) involves compiling c++ code. Therefore, if you change code in c++ side, make sure to **re-install** with `python setup_new.py install`.
+Beware: Unlike other subpackages, [motion_mjpc](./motion_mjpc/) involves compiling c++ code. Therefore, if you change code in c++ side, make sure to **re-install** with `python setup_motion.py install`.
 
 # Scripts
 - kinematic_mr.py: Use spatial motion retargeting to transfer motion at kinematic level
-- dynamic_mr.py (TODO): Use mjpc to transfer motion at dynamic level
+- dynamic_mr.py: Use [motion_mjpc](./motion_mjpc/) to transfer motion at dynamic level

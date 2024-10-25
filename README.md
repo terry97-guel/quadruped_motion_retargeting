@@ -58,7 +58,9 @@ python setup_motion.py build_ext
 python setup_motion.py install
 cd ../..
 ```
-Beware: Unlike other subpackages, [motion_mjpc](./motion_mjpc/) involves compiling c++ code. Therefore, if you change code in c++ side, make sure to **re-install** with `python setup_motion.py install`.
+Beware: Unlike other subpackages, [motion_mjpc](./motion_mjpc/) may need to be **re-install**, with `python setup_motion.py install`, under certain situtations. This procedure does not take long time, as it do not build from scratch.
+- Code in c++ side is changed, thus need to be compiled
+- Motion file is added or fixed, thus needs to be added to the python package.
 
 # Scripts
 - kinematic_mr.py: Use spatial motion retargeting to transfer motion at kinematic level

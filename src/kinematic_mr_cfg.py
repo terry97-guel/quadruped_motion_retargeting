@@ -16,7 +16,7 @@ KEY_MAP = {
 
 
 class QuadrupedCfg:
-    dataset = "MANN_LIFTED"
+    dataset = "MANN"
     MOTION = "D1_007_KAN01_001" 
     # D1_007_KAN01_001
     # D1_009_KAN01_001
@@ -58,9 +58,9 @@ class QuadrupedCfg:
 
 
     crl_joint_orders = ["trunk",
-                "FL_hip_joint", "FR_hip_joint", "RR_hip_joint", "RL_hip_joint",
-                "FL_thigh_joint", "FR_thigh_joint", "RR_thigh_joint", "RL_thigh_joint",
-                "FL_calf_joint", "FR_calf_joint", "RR_calf_joint", "RL_calf_joint"]
+                "FL_hip_joint", "FR_hip_joint", "RL_hip_joint", "RR_hip_joint",
+                "FL_thigh_joint", "FR_thigh_joint", "RL_thigh_joint", "RR_thigh_joint",
+                "FL_calf_joint", "FR_calf_joint", "RL_calf_joint", "RR_calf_joint"]
 
     
 

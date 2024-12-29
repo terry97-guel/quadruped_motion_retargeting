@@ -207,64 +207,10 @@ qpos_array_NMR = smr_agent.naive_retarget_result.copy()
 qpos_array_NMR[:,:3] = base_pos_array
 qpos_array_NMR[:,3:7] = base_quat_array
 
-for i in range(len(qpos_array_NMR)):
-    data.qpos = qpos_array_NMR[i]
-    mujoco.mj_forward(model, data)
-    viewer.cam.lookat = qpos_array_NMR[i][:3]
-    viewer.render()
-
 # %%
 smr_agent.spatial_retarget(reference_states=qpos_array_NMR, viewer=viewer)
 qpos_array_SMR = smr_agent.spatial_retarget_result.copy()
  
-for qpos in qpos_array_SMR:
-    data.qpos = qpos
-    mujoco.mj_forward(model, data)
-    viewer.cam.lookat = qpos[:3]
-    viewer.render()
-    
-# %%
-def get_scaled_site_target_dict():
-    site_target_dict = {}
-    for qpos in qpos_array_SMR:
-        data.qpos = qpos
-        mujoco.mj_forward(model, data)
-        for id_ in range(4):
-            foot_name = smr_info.foot_names[id_]
-            foot_pos = data.site_xpos[smr_info.id.foot_ids[id_]].copy()
-            if foot_name not in site_target_dict.keys():
-                site_target_dict[foot_name] = []
-                
-            foot_pos[2] = foot_pos[2] * cfg.foot_height_post_scale
-            hip_pos = data.site_xpos[smr_info.id.hip_ids[id_]].copy()
-            
-            hip_to_foot_global = foot_pos - hip_pos
-            hip_to_foot_local = np.dot(quat2R(qpos[3:7]).T, hip_to_foot_global)
-            foot_local = hip_to_foot_local + smr_info.home_hip_xpos[id_]
-            site_target_dict[foot_name].append(foot_local)
-            
-            hip_name = smr_info.hip_names[id_]
-            if hip_name not in site_target_dict.keys():
-                site_target_dict[hip_name] = []
-            site_target_dict[hip_name].append(smr_info.home_hip_xpos[id_])
-    return site_target_dict
-
-scaled_site_target_dict = get_scaled_site_target_dict()
-
-# %%
-# Set ik target and Solve
-time_stamped_target = TimeStampedTarget(time_array, scaled_site_target_dict, contact_array=contact_array)
-ik_target_holder = IKTargetHolder(model, data, smr_info).from_time_stamped_target(time_stamped_target)
-
-
-smr_agent.set_ik_target(ik_target_holder)
-smr_agent.naive_retarget(viewer)
-
-qpos_array_lifted_foot_reference = smr_agent.naive_retarget_result.copy()
-qpos_array_lifted_foot_reference[:, smr_info.id.base_qpos_adr] = qpos_array_SMR[:,smr_info.id.base_qpos_adr]
-smr_agent.spatial_retarget(reference_states=qpos_array_lifted_foot_reference, viewer=viewer)
-qpos_array_lifted_foot = smr_agent.spatial_retarget_result.copy()
-
 # %%
 # plot direct transfer
 if cfg.PLOT:
@@ -276,17 +222,9 @@ if cfg.PLOT:
     plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array_SMR, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids)
 
 # %%
-# plot lifted foot
-if cfg.PLOT:
-    plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array_lifted_foot, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids)
-    # Notice that it is natural that camera moves more up and down because the lifted foot trajectories lead to movement in trunk.
-
-# %%
 # Save motion
 from motion_menagerie import MotionIO, get_MR_json_path
 qpos_array_save = qpos_array_SMR
-if cfg.dataset.lower() in "lifted":
-    qpos_array_save = qpos_array_lifted_foot
 
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
@@ -294,7 +232,9 @@ motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, 
 
 # %%
 # reindex for CRL
-qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+qpos_array_indexed = qpos_array_save.copy()
+qpos_array_indexed[:,smr_info.id.base_qpos_adr[-1]:] = qpos_array_save[:,smr_info.id.base_qpos_adr[-1]:] - model.qpos0.copy()[smr_info.id.base_qpos_adr[-1]:]
+qpos_array_indexed = qpos_array_indexed[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
 motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
 # Save to json file (for CRL)
 motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=cfg.dt)

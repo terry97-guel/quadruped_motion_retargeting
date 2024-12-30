@@ -1,5 +1,6 @@
 from motion_menagerie.mann import MANN_BASE_PATH
 from motion_menagerie.mann_lifted import MANN_LIFTED_BASE_PATH
+from motion_menagerie.stmr import STMR_BASE_PATH
 from motion_menagerie import get_MR_json_path
 import numpy as np
 
@@ -16,8 +17,8 @@ KEY_MAP = {
 
 
 class QuadrupedCfg:
-    dataset = "MANN"
-    MOTION = "D1_007_KAN01_001" 
+    dataset = "STMR"
+    MOTION = "backflip" 
     # D1_007_KAN01_001
     # D1_009_KAN01_001
     # D1_009_KAN01_002
@@ -34,6 +35,8 @@ class QuadrupedCfg:
         MOTION_BASE_PATH = MANN_BASE_PATH
     elif dataset == "MANN_LIFTED":
         MOTION_BASE_PATH = MANN_LIFTED_BASE_PATH
+    elif dataset == "STMR":
+        MOTION_BASE_PATH = STMR_BASE_PATH
     else:
         raise ValueError("Invalid dataset")
     

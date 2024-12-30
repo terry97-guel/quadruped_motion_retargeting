@@ -32,7 +32,7 @@ from dynamic_mr_cfg import cfg
 
 # %%
 from pathlib import Path
-MJPC_TASK_PATH = Path(__file__).parent.parent/ 'quadruped_motion_mjpc/build/mjpc/tasks'
+MJPC_TASK_PATH = Path(__file__).parent.parent/ 'motion_mjpc/build_py/mjpc/tasks'
 MJPC_TASK_PATH.exists()
 
 # %%
@@ -123,7 +123,7 @@ frame_num = motion_info[cfg.MOTION]['length']
 motion_time = frame_num / fps
 T = int(motion_time /model.opt.timestep)
 
-extra_step_interval = int(0.5 / model.opt.timestep)
+extra_step_interval = int(0.1 / model.opt.timestep)
 extra_step_multiplier = 5
 
 # trajectories
@@ -218,6 +218,13 @@ for t in tqdm(range(t_start, T - 1)):
 
 # %%
 plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array, lookat_site_idr=get_site_id(model, "trunk_site"), sphere_site_ids=[get_site_id(model, foot_name+"_site") for foot_name in foot_names_ls], PLOT_EVERY=10)
+
+# %%
+for idx, qpos in enumerate(qpos_array):
+    if idx % 5 == 0:
+        data.qpos = qpos
+        mujoco.mj_forward(model, data)
+        viewer.render()
 
 # %%
 from mjtools import qpos_index_from_names

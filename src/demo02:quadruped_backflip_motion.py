@@ -17,8 +17,8 @@ from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 # from quadruped_walking_config import CustomCfg as cfg
 
 # from kinematic_mr_cfg import Go1Cfg as cfg
-from kinematic_mr_cfg import B2Cfg as cfg
-# from kinematic_mr_cfg import cfg
+# from kinematic_mr_cfg import B2Cfg as cfg
+from kinematic_mr_cfg import cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -480,7 +480,9 @@ smr_agent.set_ik_target(ik_target_holder)
 smr_agent.spatial_retarget(qpos_array, viewer=viewer)
 
 # %%
-for qpos in smr_agent.spatial_retarget_result:
+qpos_array_save = smr_agent.spatial_retarget_result[1:]
+
+for qpos in qpos_array_save:
     data.qpos = qpos
     mujoco.mj_forward(model, data)
     for _ in range(10):
@@ -488,11 +490,7 @@ for qpos in smr_agent.spatial_retarget_result:
 
 # %%
 # Save motion
-
-# %%
 from motion_menagerie import MotionIO, get_MR_json_path
-qpos_array_save = smr_agent.spatial_retarget_result
-
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
 motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.10, USE_FD=True)

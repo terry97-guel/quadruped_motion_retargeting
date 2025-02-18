@@ -47,7 +47,7 @@ model = mujoco.MjModel.from_xml_path(str(model_path))
 
 # data
 data = mujoco.MjData(model)
-planner_run_per_step = 1
+planner_run_per_step = 2
 
 # %%
 # agent
@@ -133,7 +133,7 @@ pass_step_interval = int(0.0 / model.opt.timestep)
 # extra_step_interval = 0
 # pass_step_interval = 1000
 
-extra_step_multiplier = 5
+extra_step_multiplier = 2
 
 # %%
 # trajectories
@@ -232,9 +232,10 @@ for t in tqdm(range(t_start, T - 1)):
         viewer.render()
 
 # %%
+viewer._paused = True
 plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array, lookat_site_idr=get_site_id(model, "trunk_site"), sphere_site_ids=[get_site_id(model, foot_name+"_site") for foot_name in foot_names_ls], PLOT_EVERY=10)
 
-# %%
+ # %%
 for _ in range(1):
     height_list = []
     time_ = 0

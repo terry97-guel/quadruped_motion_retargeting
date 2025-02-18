@@ -16,8 +16,8 @@ from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 
 # from quadruped_walking_config import CustomCfg as cfg
 
-from kinematic_mr_cfg import Go1Cfg as cfg
-# from kinematic_mr_cfg import cfg
+# from kinematic_mr_cfg import Go1Cfg as cfg
+from kinematic_mr_cfg import cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -25,6 +25,7 @@ else:
     qpos0 = np.zeros(12)
 # %%
 PI = np.pi
+cfg.MOTION = "backflip6"
 
 # Initalize Mujoco Model
 xml_path = ASSET_XML_DICT[cfg.ROBOT]
@@ -124,12 +125,12 @@ for _ in range(5):
     contact_list.append([True, True, True, True])
 # %%
 x = 0.3
-theta = -np.pi/30
+theta = -np.pi/15
 qpos = np.array([
-    -0.03, 0., 0.24,
+    -0.05, 0., 0.26,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x/2, 0,
-    0, x/2, 0,
+    0, x*0.2, x*0.7,
+    0, x*0.2, x*0.7,
     0, x, -x,
     0, x, -x])
 qpos[7:] += qpos0
@@ -141,15 +142,15 @@ qpos_list.append(qpos)
 contact_list.append([True, True, True, True])
 
 # %%
-x = -0.5
-theta = -np.pi/8
+x = 0.5
+theta = -np.pi/8 -np.pi/15
 qpos = np.array([
-    -0.27, 0., 0.34,
+    -0.25, 0., 0.40,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x, -x,
-    0, x, -x,
-    0, x, -x,
-    0, x, -x])
+    0, -x, x,
+    0, -x, x,
+    0, -x/2, x,
+    0, -x/2, x])
 qpos[7:] += qpos0
 
 data.qpos = qpos
@@ -160,14 +161,14 @@ contact_list.append([False, False, True, True])
 
 # %%
 x = -0.5
-theta = -np.pi * 2/7
+theta = -np.pi * 2/7 -np.pi/15
 qpos = np.array([
-    -0.30, 0., 0.43,
+    -0.25, 0., 0.54,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, -0,
     0, x*1.5, -0,
-    0, 0, -x*1.0,
-    0, 0, -x*1.0])
+    0, -x, -x*1.5,
+    0, -x, -x*1.5])
 qpos[7:] += qpos0
 
 data.qpos = qpos
@@ -178,31 +179,12 @@ contact_list.append([False, False, True, True])
 
 # %%
 x = -0.5
-theta = -np.pi * 3/7
+theta = -np.pi * 3/7 -np.pi/15
 qpos = np.array([
-    -0.45, 0., 0.45,
+    -0.36, 0., 0.6,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*2.0, -x,
-    0, x*2.0, -x,
-    0, -x *2/5, -x*1.2,
-    0, -x *2/5, -x*1.2])
-qpos[7:] += qpos0
-
-data.qpos = qpos
-mujoco.mj_forward(model, data)
-viewer.render()
-qpos_list.append(qpos)
-contact_list.append([False, False, True, True])
-
-
-# %%
-x = -0.5
-theta = -np.pi * 4/7
-qpos = np.array([
-    -0.55, 0., 0.50,
-    np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*2.0, -x,
-    0, x*2.0, -x,
+    0, x*2.0, 0,
+    0, x*2.0, 0,
     0, -x*1.2, -x*2.5,
     0, -x*1.2, -x*2.5])
 qpos[7:] += qpos0
@@ -216,9 +198,9 @@ contact_list.append([False, False, True, True])
 
 # %%
 x = -0.5
-theta = -np.pi * 5/7
+theta = -np.pi * 5/6
 qpos = np.array([
-    -0.60, 0., 0.53,
+    -0.38, 0., 0.62,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -234,9 +216,9 @@ contact_list.append([False, False, False, False])
 
 # %%
 x = -0.5
-theta = -np.pi * 6/7
+theta = -np.pi * 6/6
 qpos = np.array([
-    -0.64, 0., 0.55,
+    -0.40, 0., 0.63,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -252,9 +234,9 @@ contact_list.append([False, False, False, False])
 
 # %%
 x = -0.5
-theta = -np.pi * 7/7
+theta = -np.pi * 7/6
 qpos = np.array([
-    -0.68, 0., 0.56,
+    -0.42, 0., 0.64,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, x * 0.5,
     0, x*1.5, x * 0.5,
@@ -271,9 +253,9 @@ contact_list.append([False, False, False, False])
 
 # %%
 x = -0.5
-theta = -np.pi * 8/7
+theta = -np.pi * 8/6
 qpos = np.array([
-    -0.72, 0., 0.55,
+    -0.44, 0., 0.63,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -289,12 +271,12 @@ contact_list.append([False, False, False, False])
 
 # %%
 x = -0.5
-theta = -np.pi * 9/7
+theta = -np.pi * 9/6
 qpos = np.array([
-    -0.76, 0., 0.53,
+    -0.44, 0., 0.62,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*1.0, x,
-    0, x*1.0, x,
+    0, x*1.5, x*0.5,
+    0, x*1.5, x*0.5,
     0, -x, -x*1.0,
     0, -x, -x*1.0])
 qpos[7:] += qpos0
@@ -307,12 +289,12 @@ contact_list.append([False, False, False, False])
 
 # %%
 x = -0.5
-theta = -np.pi * 10/7
+theta = -np.pi * 10/6
 qpos = np.array([
-    -0.80, 0., 0.50,
+    -0.44, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*1.0, x,
-    0, x*1.0, x,
+    0, x*2.0, 0,
+    0, x*2.0, 0,
     0, -x, -x*0.5,
     0, -x, -x*0.5])
 qpos[7:] += qpos0
@@ -325,12 +307,12 @@ contact_list.append([False, False, False, False])
 
 # %%
 x = -0.5
-theta = -np.pi * 11/7
+theta = -np.pi * 11/6
 qpos = np.array([
-    -0.84, 0., 0.45,
+    -0.46, 0., 0.54,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*0.5, 0,
-    0, x*0.5, 0,
+    0, x*1.5, -x*.5,
+    0, x*1.5, -x*.5,
     0, -x*0.5, -0,
     0, -x*0.5, -0])
 qpos[7:] += qpos0
@@ -339,49 +321,49 @@ data.qpos = qpos
 mujoco.mj_forward(model, data)
 viewer.render()
 qpos_list.append(qpos)
-contact_list.append([False, False, False, False])
-
-# %%
-x = -0.5
-theta = -np.pi * 12/7
-qpos = np.array([
-    -0.88, 0., 0.36,
-    np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*0.5, 0,
-    0, x*0.5, 0,
-    0, 0, 0.5*x,
-    0, 0, 0.5*x])
-qpos[7:] += qpos0
-
-data.qpos = qpos
-mujoco.mj_forward(model, data)
-viewer.render()
-qpos_list.append(qpos)
 contact_list.append([True, True, False, False])
 
 # %%
-x = -0.5
-theta = -np.pi * 13/7
-qpos = np.array([
-    -0.92, 0., 0.36,
-    np.cos(theta/2), 0., np.sin(theta/2), 0.,
-    0, x*0.5, 0,
-    0, x*0.5, 0,
-    0, 0, 0.5*x,
-    0, 0, 0.5*x])
-qpos[7:] += qpos0
+# x = -0.5
+# theta = -np.pi * 12/6
+# qpos = np.array([
+#     -0.88, 0., 0.40,
+#     np.cos(theta/2), 0., np.sin(theta/2), 0.,
+#     0, x*1.5, 0,
+#     0, x*1.5, 0,
+#     0, 0, 0.5*x,
+#     0, 0, 0.5*x])
+# qpos[7:] += qpos0
 
-data.qpos = qpos
-mujoco.mj_forward(model, data)
-viewer.render()
-qpos_list.append(qpos)
-contact_list.append([True, True, False, False])
+# data.qpos = qpos
+# mujoco.mj_forward(model, data)
+# viewer.render()
+# qpos_list.append(qpos)
+# contact_list.append([True, True, False, False])
+
+# # %%
+# x = -0.5
+# theta = -np.pi * 13/6
+# qpos = np.array([
+#     -0.92, 0., 0.36,
+#     np.cos(theta/2), 0., np.sin(theta/2), 0.,
+#     0, x*0.5, 0,
+#     0, x*0.5, 0,
+#     0, 0, 0.5*x,
+#     0, 0, 0.5*x])
+# qpos[7:] += qpos0
+
+# data.qpos = qpos
+# mujoco.mj_forward(model, data)
+# viewer.render()
+# qpos_list.append(qpos)
+# contact_list.append([True, True, False, False])
 
 # %%
 theta = -np.pi * 14/7
 x = 0.25
 qpos = np.array([
-    -0.96, 0., 0.22,
+    -0.48, 0., 0.23,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x, -x,
     0, x, -x,
@@ -399,7 +381,7 @@ for _ in range(5):
 
 # %%
 qpos = np.array([
-    -0.96, 0., 0.26,
+    -0.48, 0., 0.26,
     1., 0., 0., 0.,
     0, 0, 0,
     0, 0, 0,
@@ -487,6 +469,6 @@ qpos_array_save = smr_agent.spatial_retarget_result
 
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
-motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.06, USE_FD=True)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.05, USE_FD=True)
 
 # %%

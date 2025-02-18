@@ -18,17 +18,7 @@ KEY_MAP = {
 
 class QuadrupedCfg:
     dataset = "STMR"
-    MOTION = "backflip" 
-    # D1_007_KAN01_001
-    # D1_009_KAN01_001
-    # D1_009_KAN01_002
-    # D1_010_KAN01_002
-    # D1_010_KAN01_003
-    # D1_010_KAN01_004
-    
-    # D1_025_KAN01_001
-    # D1_047z_KAN01_005
-    # D1_049_KAN01_001
+    MOTION = "backflip2" 
     KEY_MAP = KEY_MAP
 
     if dataset == "MANN":
@@ -69,12 +59,20 @@ class QuadrupedCfg:
 
     MR = "SMR"
     
+class Go1Cfg(QuadrupedCfg):
+    ROBOT = "go1_task"
+    scale = np.array([0.8,1.0,0.90])
+
 class Go2Cfg(QuadrupedCfg):
     ROBOT = "go2_task"
     scale = np.array([0.8,1.0,0.90])
     
 class A1Cfg(QuadrupedCfg):
     ROBOT = "a1_task"
+    scale = np.array([0.8,1,0.8])
+
+class B2Cfg(QuadrupedCfg):
+    ROBOT = "b2_task"
     scale = np.array([0.8,1,0.8])
     
 cfg = Go2Cfg

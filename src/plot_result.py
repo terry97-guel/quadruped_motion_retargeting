@@ -48,6 +48,7 @@ motion_xml_path = cfg.MOTION_BASE_PATH/f"{cfg.MR}/{cfg.ROBOT}/xml/{cfg.MOTION}.x
 motion_read = MotionIO(model, data, viewer).read_motion_xml(motion_xml_path)
 
 # %%
-plot_robot(viewer=viewer, model=model, data=data, qpos_array=motion_read.qpos_array, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids, PLOT_EVERY=10)
+for _ in range(10):
+    plot_robot(viewer=viewer, model=model, data=data, qpos_array=motion_read.qpos_array, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids, PLOT_EVERY=10)
 
 # %%

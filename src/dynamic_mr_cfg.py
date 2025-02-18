@@ -7,7 +7,7 @@ import numpy as np
 
 class QuadrupedCfg:
     dataset = "STMR"
-    MOTION = "backflip" 
+    MOTION = "backflip2" 
 
     ROBOT = "go2_task"
     ROBOT_CLASS = "Quadruped"
@@ -39,10 +39,4 @@ class QuadrupedCfg:
 
     motion_info_from_path = get_MR_info_path(MOTION_BASE_PATH, ROBOT, "SMR").resolve()
 
-class Go2Cfg(QuadrupedCfg):
-    ROBOT = "go2_task"
-    
-class A1Cfg(QuadrupedCfg):
-    ROBOT = "a1_task"
-    
-cfg = Go2Cfg
+cfg = QuadrupedCfg

@@ -17,21 +17,14 @@ from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 # from quadruped_walking_config import CustomCfg as cfg
 
 # from kinematic_mr_cfg import Go1Cfg as cfg
-from kinematic_mr_cfg import B2Cfg as cfg
-# from kinematic_mr_cfg import cfg
+from kinematic_mr_cfg import cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
-elif cfg.ROBOT == "a1_task":
-    qpos0 = np.zeros(12)
-elif cfg.ROBOT == "go2_task":
-    qpos0 = np.zeros(12)
-elif cfg.ROBOT == "b2_task":
-    qpos0 = np.array([0, 0.9, -1.8]*4)
 else:
-    raise ValueError("Invalid Robot name")
+    qpos0 = np.zeros(12)
 # %%
-cfg.MOTION = "backflip2"
+cfg.MOTION = "backflip3"
 PI = np.pi
 
 # Initalize Mujoco Model
@@ -63,37 +56,37 @@ contact_list = []
 viewer.render()
 
 # %% 
-qpos = np.array([
-    0., 0., 0.26,
-    1., 0., 0., 0.,
-    0, 0, 0,
-    0, 0, 0,
-    0, 0, 0,
-    0, 0, 0])
-qpos[7:] += qpos0
-data.qpos = qpos
-mujoco.mj_forward(model, data)
-viewer.render()
+# qpos = np.array([
+#     0., 0., 0.26,
+#     1., 0., 0., 0.,
+#     0, 0, 0,
+#     0, 0, 0,
+#     0, 0, 0,
+#     0, 0, 0])
+# qpos[7:] += qpos0
+# data.qpos = qpos
+# mujoco.mj_forward(model, data)
+# viewer.render()
 
-for _ in range(10):
-    qpos_list.append(qpos)
-    contact_list.append([True, True, True, True])
+# for _ in range(10):
+#     qpos_list.append(qpos)
+#     contact_list.append([True, True, True, True])
 
 # %%
-x = 0.25
-qpos = np.array([
-    0., 0., 0.22,
-    1., 0., 0., 0.,
-    0, x, -x,
-    0, x, -x,
-    0, x, -x,
-    0, x, -x])
-qpos[7:] += qpos0
-data.qpos = qpos
-mujoco.mj_forward(model, data)
-viewer.render()
-qpos_list.append(qpos)
-contact_list.append([True, True, True, True])
+# x = 0.25
+# qpos = np.array([
+#     0., 0., 0.22,
+#     1., 0., 0., 0.,
+#     0, x, -x,
+#     0, x, -x,
+#     0, x, -x,
+#     0, x, -x])
+# qpos[7:] += qpos0
+# data.qpos = qpos
+# mujoco.mj_forward(model, data)
+# viewer.render()
+# qpos_list.append(qpos)
+# contact_list.append([True, True, True, True])
 
 # # %%
 # x = 0.3
@@ -207,7 +200,7 @@ contact_list.append([False, False, True, True])
 x = -0.5
 theta = -np.pi * 4/7
 qpos = np.array([
-    -0.55, 0., 0.54,
+    -0.55, 0., 0.50,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -226,7 +219,7 @@ contact_list.append([False, False, True, True])
 x = -0.5
 theta = -np.pi * 5/7
 qpos = np.array([
-    -0.60, 0., 0.60,
+    -0.60, 0., 0.53,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -244,7 +237,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 6/7
 qpos = np.array([
-    -0.64, 0., 0.64,
+    -0.64, 0., 0.55,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -262,7 +255,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 7/7
 qpos = np.array([
-    -0.68, 0., 0.66,
+    -0.68, 0., 0.56,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, x * 0.5,
     0, x*1.5, x * 0.5,
@@ -281,7 +274,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 8/7
 qpos = np.array([
-    -0.72, 0., 0.64,
+    -0.72, 0., 0.55,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -299,7 +292,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 9/7
 qpos = np.array([
-    -0.76, 0., 0.60,
+    -0.76, 0., 0.53,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -317,7 +310,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 10/7
 qpos = np.array([
-    -0.80, 0., 0.56,
+    -0.80, 0., 0.50,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -495,6 +488,6 @@ qpos_array_save = smr_agent.spatial_retarget_result
 
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
-motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.10, USE_FD=True)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.06, USE_FD=True)
 
 # %%

@@ -28,6 +28,7 @@ from motion_menagerie.mann import MANN_BASE_PATH
 from mujoco_viewer import MujocoViewer
 from mjtools import get_site_id, plot_sphere, reset, reset_with_mocap, plot_robot
 
+# from dynamic_mr_cfg import Go1Cfg as cfg
 from dynamic_mr_cfg import cfg
 
 # %%
@@ -60,8 +61,11 @@ except Exception:
     pass
 viewer = MujocoViewer(
         model,data,mode='window',title="MPC",
-        width=1200,height=800,hide_menus=True
+        width=600,height=400,hide_menus=True
 )
+viewer._contacts = True
+viewer.vopt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = viewer._contacts
+viewer.vopt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = viewer._contacts
 
 reset(model, data)
 viewer.cam.lookat = data.qpos[:3]
@@ -123,9 +127,15 @@ frame_num = motion_info[cfg.MOTION]['length']
 motion_time = frame_num / fps
 T = int(motion_time /model.opt.timestep)
 
-extra_step_interval = int(0.1 / model.opt.timestep)
+extra_step_interval = int(3.0 / model.opt.timestep)
+pass_step_interval = int(0.0 / model.opt.timestep)
+
+# extra_step_interval = 0
+# pass_step_interval = 1000
+
 extra_step_multiplier = 5
 
+# %%
 # trajectories
 qpos_array = np.zeros((T, model.nq))
 qvel_array = np.zeros((T, model.nv))
@@ -171,7 +181,7 @@ for t in tqdm(range(t_start, T - 1)):
     )
 
     # run planner for num_steps
-    if t<extra_step_interval:
+    if t<extra_step_interval and t>pass_step_interval:
         planner_run_per_step_ = planner_run_per_step * extra_step_multiplier
     else:
         planner_run_per_step_ = planner_run_per_step
@@ -208,7 +218,12 @@ for t in tqdm(range(t_start, T - 1)):
     # render
     if t%10==0:
         # viewer.cam.lookat = data.qpos[:3]
-        viewer.cam.lookat = data.mocap_pos[0,:3]
+        # viewer.cam.lookat = data.mocap_pos[0,:3]
+        viewer.cam.distance = 2.0
+        viewer.cam.lookat = data.qpos[:3]
+        viewer.cam.azimuth = 90
+        viewer.cam.elevation = -2
+        viewer.render()
         for foot_i in range(4):
             foot_rgba = [1,0,0,0.5] if contact_array[t+1][foot_i] else [0,1,0,0.5]
             foot_name = foot_names_ls[foot_i]
@@ -220,11 +235,39 @@ for t in tqdm(range(t_start, T - 1)):
 plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array, lookat_site_idr=get_site_id(model, "trunk_site"), sphere_site_ids=[get_site_id(model, foot_name+"_site") for foot_name in foot_names_ls], PLOT_EVERY=10)
 
 # %%
-for idx, qpos in enumerate(qpos_array):
-    if idx % 5 == 0:
-        data.qpos = qpos
-        mujoco.mj_forward(model, data)
-        viewer.render()
+for _ in range(1):
+    height_list = []
+    time_ = 0
+    for idx, qpos in enumerate(qpos_array):
+        if idx % 2 == 0:
+            agent.set_state(
+                time=time_
+            )
+            data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+            data.qpos = qpos
+            mujoco.mj_forward(model, data)
+            viewer.render()
+        
+        height_list.append(data.qpos[2])
+        time_ += model.opt.timestep
+    print(max(height_list))
+
+# %%
+# plot ctrl_array
+plt.figure()
+plt.plot(ctrl_array)
+plt.legend([f"ctrl_{i}" for i in range(model.nu)])
+
+# %%
+# plot target only
+target_time_array = np.arange(0, motion_time, model.opt.timestep)
+for time_ in target_time_array:
+    agent.set_state(
+        time=time_
+    )
+    data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+    mujoco.mj_forward(model, data)
+    viewer.render()
 
 # %%
 from mjtools import qpos_index_from_names
@@ -239,5 +282,44 @@ qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joi
 motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
 motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
 
+
+# %%
+def output_amp_motion(frames, out_filename, motion_weight, frame_duration):
+  from pathlib import Path
+  Path(out_filename).parent.mkdir(parents=True, exist_ok=True)
+  with open(out_filename, "w") as f:
+    f.write("{\n")
+    f.write("\"LoopMode\": \"Wrap\",\n")
+    f.write("\"FrameDuration\": " + str(frame_duration) + ",\n")
+    f.write("\"EnableCycleOffsetPosition\": true,\n")
+    f.write("\"EnableCycleOffsetRotation\": true,\n")
+    f.write("\"MotionWeight\": " + str(motion_weight) + ",\n")
+    f.write("\n")
+
+    f.write("\"Frames\":\n")
+    f.write("[")
+    for i in range(frames.shape[0]):
+      curr_frame = frames[i]
+
+      if i != 0:
+        f.write(",")
+      f.write("\n  [")
+      for j in range(frames.shape[1]):
+        curr_val = curr_frame[j]
+        if j != 0:
+          f.write(", ")
+        f.write("%.5f" % curr_val)
+
+      f.write("]")
+
+    f.write("\n]")
+    f.write("\n}")
+
+  return True
+
+qpos_amp = qpos_array.copy()
+qpos_amp[:, [3,4,5,6]] = qpos_array[:, [4,5,6,3]]
+
+output_amp_motion(qpos_amp, f"{cfg.ROBOT}_{cfg.MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep)
 
 # %%

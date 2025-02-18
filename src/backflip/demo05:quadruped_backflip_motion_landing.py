@@ -16,14 +16,15 @@ from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 
 # from quadruped_walking_config import CustomCfg as cfg
 
-from kinematic_mr_cfg import Go1Cfg as cfg
-# from kinematic_mr_cfg import cfg
+# from kinematic_mr_cfg import Go1Cfg as cfg
+from kinematic_mr_cfg import cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
 else:
     qpos0 = np.zeros(12)
 # %%
+cfg.MOTION = "backflip5"
 PI = np.pi
 
 # Initalize Mujoco Model
@@ -199,7 +200,7 @@ contact_list.append([False, False, True, True])
 x = -0.5
 theta = -np.pi * 4/7
 qpos = np.array([
-    -0.55, 0., 0.50,
+    -0.55, 0., 0.54,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -218,7 +219,7 @@ contact_list.append([False, False, True, True])
 x = -0.5
 theta = -np.pi * 5/7
 qpos = np.array([
-    -0.60, 0., 0.53,
+    -0.60, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -236,7 +237,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 6/7
 qpos = np.array([
-    -0.64, 0., 0.55,
+    -0.64, 0., 0.64,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -254,7 +255,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 7/7
 qpos = np.array([
-    -0.68, 0., 0.56,
+    -0.68, 0., 0.66,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, x * 0.5,
     0, x*1.5, x * 0.5,
@@ -273,7 +274,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 8/7
 qpos = np.array([
-    -0.72, 0., 0.55,
+    -0.72, 0., 0.64,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -291,7 +292,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 9/7
 qpos = np.array([
-    -0.76, 0., 0.53,
+    -0.76, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -309,7 +310,7 @@ contact_list.append([False, False, False, False])
 x = -0.5
 theta = -np.pi * 10/7
 qpos = np.array([
-    -0.80, 0., 0.50,
+    -0.80, 0., 0.56,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -487,6 +488,6 @@ qpos_array_save = smr_agent.spatial_retarget_result
 
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
-motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.06, USE_FD=True)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.05, USE_FD=True)
 
 # %%

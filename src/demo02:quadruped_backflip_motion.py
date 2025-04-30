@@ -15,10 +15,10 @@ from smr.agent import SMR
 from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 
 # from quadruped_walking_config import CustomCfg as cfg
-
+from mjtools import qpos_index_from_names
 # from kinematic_mr_cfg import Go1Cfg as cfg
-# from kinematic_mr_cfg import B2Cfg as cfg
-from kinematic_mr_cfg import cfg
+from kinematic_mr_cfg import B2Cfg as cfg
+# from kinematic_mr_cfg import cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -493,6 +493,24 @@ for qpos in qpos_array_save:
 from motion_menagerie import MotionIO, get_MR_json_path
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
-motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=0.10, USE_FD=True)
+
+qpos_array_indexed = qpos_array_save.copy()
+qpos_array_indexed[:,smr_info.id.base_qpos_adr[-1]:] = qpos_array_save[:,smr_info.id.base_qpos_adr[-1]:] - model.qpos0.copy()[smr_info.id.base_qpos_adr[-1]:]
+qpos_array_indexed = qpos_array_indexed[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
+motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=cfg.dt)
+
+# %%
+if cfg.ROBOT == "go1_task":
+    dt = 0.040
+elif cfg.ROBOT == "b2_task":
+    dt = 0.040
+    # dt = 0.060
+elif cfg.ROBOT == "go2_task":
+    dt = 0.05
+else:
+    raise ValueError("Invalid Robot name")
+
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=dt, USE_FD=True)
 
 # %%

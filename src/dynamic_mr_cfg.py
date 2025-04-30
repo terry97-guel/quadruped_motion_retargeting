@@ -10,7 +10,8 @@ class QuadrupedCfg:
     MOTION = "backflip2" 
 
     ROBOT = "b2_task"
-    ROBOT = "go2_task"
+    # ROBOT = "go1_task"
+    # ROBOT = "go2_task"
     ROBOT_CLASS = "Quadruped"
     # MOTION = "D1_007_KAN01_001"
 

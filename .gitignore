@@ -162,3 +162,5 @@ cython_debug/
 .idea/
 .vscode
 src/MUJOCO_LOG.TXT
+*.png
+.DS_Store

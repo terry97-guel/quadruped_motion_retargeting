@@ -48,7 +48,61 @@ motion_xml_path = cfg.MOTION_BASE_PATH/f"{cfg.MR}/{cfg.ROBOT}/xml/{cfg.MOTION}.x
 motion_read = MotionIO(model, data, viewer).read_motion_xml(motion_xml_path)
 
 # %%
-for _ in range(10):
-    plot_robot(viewer=viewer, model=model, data=data, qpos_array=motion_read.qpos_array, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids, PLOT_EVERY=10)
+# for _ in range(10):
+#     plot_robot(viewer=viewer, model=model, data=data, qpos_array=motion_read.qpos_array, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids, PLOT_EVERY=10)
 
+# %%
+import cv2
+def grab_image(viewer, resize_rate=None,interpolation=cv2.INTER_NEAREST):
+   """
+      Grab the rendered iamge
+   """
+   img = np.zeros((viewer.viewport.height,viewer.viewport.width,3),dtype=np.uint8)
+   mujoco.mjr_render(viewer.viewport,viewer.scn,viewer.ctx)
+   mujoco.mjr_readPixels(img, None,viewer.viewport,viewer.ctx)
+   img = np.flipud(img) # flip image
+   # Resize
+   if resize_rate is not None:
+      h = int(img.shape[0]*resize_rate)
+      w = int(img.shape[1]*resize_rate)
+      img = cv2.resize(img,(w,h),interpolation=interpolation)
+   return img
+
+# %%
+lookat_site_idr = smr_info.id.trunk_site
+viewer.cam.distance = 2.0
+viewer.cam.azimuth = 90
+viewer.cam.elevation = -2
+
+from pathlib import Path
+save_name = f"output/{cfg.ROBOT}"
+save_folder = Path(save_name)
+save_folder.mkdir(parents=True, exist_ok=True)
+
+data.mocap_pos[:] = 10
+
+for i in range(0, len(motion_read.qpos_array), 10):
+    qpos = motion_read.qpos_array[i]
+    data.qpos[:] = qpos
+
+    mujoco.mj_forward(model, data)
+    viewer.cam.lookat = data.site_xpos[lookat_site_idr].copy()
+    viewer.render()
+
+    img = grab_image(viewer)
+
+    # plot with matplotlib
+    plt.figure()
+    plt.imshow(img)
+    plt.axis("off")
+    # remove white space
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0, 0)
+    
+    # save image
+    plt.savefig(save_folder/f"{i:04d}.png")
+    plt.close()
+    
 # %%

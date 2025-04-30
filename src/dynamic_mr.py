@@ -233,6 +233,10 @@ for t in tqdm(range(t_start, T - 1)):
 
 # %%
 viewer._paused = True
+viewer.cam.distance = 2.0
+viewer.cam.azimuth = 90
+
+data.mocap_pos[:] = 10
 plot_robot(viewer=viewer, model=model, data=data, qpos_array=qpos_array, lookat_site_idr=get_site_id(model, "trunk_site"), sphere_site_ids=[get_site_id(model, foot_name+"_site") for foot_name in foot_names_ls], PLOT_EVERY=10)
 
  # %%
@@ -262,13 +266,15 @@ plt.legend([f"ctrl_{i}" for i in range(model.nu)])
 # %%
 # plot target only
 target_time_array = np.arange(0, motion_time, model.opt.timestep)
-for time_ in target_time_array:
-    agent.set_state(
-        time=time_
-    )
-    data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
-    mujoco.mj_forward(model, data)
-    viewer.render()
+for idx in range(len(target_time_array)):
+    if idx % 10 == 0:    
+        time_ = target_time_array[idx]
+        agent.set_state(
+            time=time_
+        )
+        data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+        mujoco.mj_forward(model, data)
+        viewer.render()
 
 # %%
 from mjtools import qpos_index_from_names

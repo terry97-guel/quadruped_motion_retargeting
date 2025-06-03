@@ -1,0 +1,15 @@
+[submodule "mj_tools"]
+	path = mj_tools
+	url = git@github.com:terry97-guel/mj_tools.git
+[submodule "robot_menagerie"]
+	path = robot_menagerie
+	url = git@github.com:terry97-guel/robot_menagerie.git
+[submodule "spatial_motion_retargeting"]
+	path = spatial_motion_retargeting
+	url = git@github.com:terry97-guel/spatial_motion_retargeting.git
+[submodule "motion_menagerie"]
+	path = motion_menagerie
+	url = git@github.com:terry97-guel/motion_menagerie.git
+[submodule "motion_mjpc"]
+	path = motion_mjpc
+	url = git@github.com:terry97-guel/motion_mjpc.git

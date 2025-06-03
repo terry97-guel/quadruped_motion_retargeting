@@ -9,7 +9,7 @@ class QuadrupedCfg:
     dataset = "STMR"
     MOTION = "backflip2_long"
 
-    ROBOT = "b2_task"
+    ROBOT = "go1_task"
     # ROBOT = "go1_task"
     # ROBOT = "go2_task"
     ROBOT_CLASS = "Quadruped"

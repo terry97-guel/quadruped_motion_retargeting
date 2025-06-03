@@ -16,8 +16,8 @@ from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
 
 # from quadruped_walking_config import CustomCfg as cfg
 from mjtools import qpos_index_from_names
-# from kinematic_mr_cfg import Go1Cfg as cfg
-from kinematic_mr_cfg import B2Cfg as cfg
+from kinematic_mr_cfg import Go1Cfg as cfg
+# from kinematic_mr_cfg import B2Cfg as cfg
 # from kinematic_mr_cfg import cfg
 
 if cfg.ROBOT == "go1_task":
@@ -503,6 +503,8 @@ motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, q
 # %%
 if cfg.ROBOT == "go1_task":
     dt = 0.040
+    if "long" in cfg.MOTION:
+        dt = 0.060
 elif cfg.ROBOT == "b2_task":
     # dt = 0.040
     dt = 0.060

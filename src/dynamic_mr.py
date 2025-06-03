@@ -50,6 +50,12 @@ data = mujoco.MjData(model)
 planner_run_per_step = 2
 
 # %%
+gain_list = []
+for i in range(model.nu):
+    gain_list.append(model.actuator(i).gainprm[0].item())
+print(f"Gain list: {gain_list}")
+
+# %%
 # agent
 agent = agent_lib.Agent(task_id=f"{robot_name}Motion", model=model)
 agent.set_mode(cfg.MOTION)

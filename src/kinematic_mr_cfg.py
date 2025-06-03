@@ -18,7 +18,7 @@ KEY_MAP = {
 
 class QuadrupedCfg:
     dataset = "STMR"
-    MOTION = "backflip2" 
+    MOTION = "backflip2"
     KEY_MAP = KEY_MAP
 
     if dataset == "MANN":

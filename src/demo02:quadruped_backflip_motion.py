@@ -31,7 +31,7 @@ elif cfg.ROBOT == "b2_task":
 else:
     raise ValueError("Invalid Robot name")
 # %%
-cfg.MOTION = "backflip2"
+cfg.MOTION = "backflip2_long"
 PI = np.pi
 
 # Initalize Mujoco Model
@@ -504,8 +504,8 @@ motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, q
 if cfg.ROBOT == "go1_task":
     dt = 0.040
 elif cfg.ROBOT == "b2_task":
-    dt = 0.040
-    # dt = 0.060
+    # dt = 0.040
+    dt = 0.060
 elif cfg.ROBOT == "go2_task":
     dt = 0.05
 else:

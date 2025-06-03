@@ -136,6 +136,19 @@ pass_step_interval = int(0.0 / model.opt.timestep)
 extra_step_multiplier = 2
 
 # %%
+# plot target only
+target_time_array = np.arange(0, motion_time, model.opt.timestep)
+for idx in range(len(target_time_array)):
+    if idx % 10 == 0:    
+        time_ = target_time_array[idx]
+        agent.set_state(
+            time=time_
+        )
+        data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+        mujoco.mj_forward(model, data)
+        viewer.render()
+
+# %%
 # trajectories
 qpos_array = np.zeros((T, model.nq))
 qvel_array = np.zeros((T, model.nv))

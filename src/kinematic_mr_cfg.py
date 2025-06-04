@@ -83,4 +83,7 @@ class Go1box2Cfg(QuadrupedCfg):
     ROBOT = "go1box2_task"
     scale = np.array([0.8,1.0,0.90])
 
+class Go1box3Cfg(QuadrupedCfg):
+    ROBOT = "go1box3_task"
+    scale = np.array([0.8,1.0,0.90])
 cfg = Go2Cfg

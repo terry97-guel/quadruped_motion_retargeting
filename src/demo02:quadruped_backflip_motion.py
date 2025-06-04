@@ -20,7 +20,8 @@ from kinematic_mr_cfg import Go1Cfg as cfg
 # from kinematic_mr_cfg import B2Cfg as cfg
 # from kinematic_mr_cfg import cfg
 # from kinematic_mr_cfg import Go1box1Cfg as cfg
-from kinematic_mr_cfg import Go1box2Cfg as cfg
+# from kinematic_mr_cfg import Go1box2Cfg as cfg
+from kinematic_mr_cfg import Go1box3Cfg as cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)

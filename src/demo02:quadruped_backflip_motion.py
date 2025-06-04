@@ -19,6 +19,7 @@ from mjtools import qpos_index_from_names
 from kinematic_mr_cfg import Go1Cfg as cfg
 # from kinematic_mr_cfg import B2Cfg as cfg
 # from kinematic_mr_cfg import cfg
+from kinematic_mr_cfg import Go1box1Cfg as cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -27,6 +28,8 @@ elif cfg.ROBOT == "a1_task":
 elif cfg.ROBOT == "go2_task":
     qpos0 = np.zeros(12)
 elif cfg.ROBOT == "b2_task":
+    qpos0 = np.array([0, 0.9, -1.8]*4)
+elif cfg.ROBOT == "go1box1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
 else:
     raise ValueError("Invalid Robot name")
@@ -48,7 +51,7 @@ except Exception:
     pass
 viewer = MujocoViewer(
 model,data,mode='window',title="MPC",
-width=300,height=200,hide_menus=True
+width=800,height=400,hide_menus=True
 )
 
 viewer.cam.lookat = data.qpos[:3]
@@ -59,6 +62,8 @@ qpos_list = []
 contact_list = []
 
 # %%
+data.qpos[7:] = qpos0
+mujoco.mj_forward(model, data)
 # viewer._paused = True
 viewer.render()
 
@@ -485,7 +490,7 @@ qpos_array_save = smr_agent.spatial_retarget_result[1:]
 for qpos in qpos_array_save:
     data.qpos = qpos
     mujoco.mj_forward(model, data)
-    for _ in range(10):
+    for _ in range(2):
         viewer.render()
 
 # %%
@@ -502,6 +507,10 @@ motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, q
 
 # %%
 if cfg.ROBOT == "go1_task":
+    dt = 0.040
+    if "long" in cfg.MOTION:
+        dt = 0.060
+elif "go1box" in cfg.ROBOT :
     dt = 0.040
     if "long" in cfg.MOTION:
         dt = 0.060

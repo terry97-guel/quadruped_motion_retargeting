@@ -67,7 +67,7 @@ except Exception:
     pass
 viewer = MujocoViewer(
         model,data,mode='window',title="MPC",
-        width=600,height=400,hide_menus=True
+        width=1200,height=800,hide_menus=True
 )
 viewer._contacts = True
 viewer.vopt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = viewer._contacts
@@ -263,7 +263,7 @@ for _ in range(1):
     height_list = []
     time_ = 0
     for idx, qpos in enumerate(qpos_array):
-        if idx % 2 == 0:
+        if idx % 3 == 0:
             agent.set_state(
                 time=time_
             )

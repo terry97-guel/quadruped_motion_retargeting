@@ -296,6 +296,41 @@ for idx in range(len(target_time_array)):
         viewer.render()
 
 # %%
+
+qpos_array_original = qpos_array.copy()
+# %%
+def pad_front(qpos_array, pad_length = 1.0):
+    """Pad the front of the qpos_array with the first frame."""
+    keep_frame = int(pad_length / model.opt.timestep) 
+    ls = []
+    ls.append(np.tile(qpos_array_original[0], (keep_frame)).reshape(keep_frame,19))
+    ls.append(qpos_array_original)
+    qpos_array = np.concat(ls)
+
+    return qpos_array
+qpos_array = qpos_array_original.copy()
+qpos_array = pad_front(qpos_array, pad_length=1.0)
+
+qpos_array.shape, qpos_array_original.shape
+ # %%
+for _ in range(1):
+    height_list = []
+    time_ = 0
+    for idx, qpos in enumerate(qpos_array):
+        if idx % 3 == 0:
+            agent.set_state(
+                time=time_
+            )
+            data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+            data.qpos = qpos
+            mujoco.mj_forward(model, data)
+            viewer.render()
+        
+        height_list.append(data.qpos[2])
+        time_ += model.opt.timestep
+    print(max(height_list))
+
+# %%
 from mjtools import qpos_index_from_names
 from motion_menagerie import get_MR_json_path, MotionIO
 

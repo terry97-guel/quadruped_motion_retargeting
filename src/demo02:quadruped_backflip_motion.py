@@ -483,15 +483,16 @@ time_stamped_target = TimeStampedTarget(time_array, site_target_dict, contact_ar
 ik_target_holder = IKTargetHolder(model, data, smr_info).from_time_stamped_target(time_stamped_target)
 
 # %%
-smr_agent.set_ik_target(ik_target_holder)
-smr_agent.spatial_retarget(qpos_array, viewer=viewer)
-
-# %%
+viewer.cam.distance = 2.5
 for qpos in qpos_array:
     data.qpos = qpos
     mujoco.mj_forward(model, data)
     for _ in range(2):
         viewer.render()
+
+# %%
+smr_agent.set_ik_target(ik_target_holder)
+smr_agent.spatial_retarget(qpos_array, viewer=viewer)
 
 # %%
 qpos_array_save = smr_agent.spatial_retarget_result[1:]

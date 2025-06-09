@@ -355,8 +355,8 @@ if cfg.SAVE:
     # os._exit(1)
 
 # %%
-qpos_array = qpos_array_save.copy()
-    
+# qpos_array = qpos_array_save.copy()
+
 # %%
 # plot ctrl_array
 plt.figure()
@@ -365,14 +365,9 @@ plt.legend([f"ctrl_{i}" for i in range(model.nu)])
 
 # %%
 # plot target only
-target_time_array = np.arange(0, motion_time, model.opt.timestep)
-for idx in range(len(target_time_array)):
-    if idx % 10 == 0:    
-        time_ = target_time_array[idx]
-        agent.set_state(
-            time=time_
-        )
-        data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+for idx, mpos in enumerate(mpos_array):
+    if idx % 10 == 0:
+        data.mocap_pos = mpos.reshape(-1, 3)
         mujoco.mj_forward(model, data)
         viewer.render()
 
@@ -380,29 +375,30 @@ for idx in range(len(target_time_array)):
 
 # qpos_array_original = qpos_array.copy()
 # %%
-def pad_front(qpos_array, pad_length = 1.0):
+def pad_front(qpos_array, mpos_array, pad_length = 1.0):
     """Pad the front of the qpos_array with the first frame."""
     keep_frame = int(pad_length / model.opt.timestep) 
     ls = []
-    ls.append(np.tile(qpos_array[0], (keep_frame)).reshape(keep_frame,19))
+    ls.append(np.tile(qpos_array[1], (keep_frame)).reshape(keep_frame,19))
     ls.append(qpos_array)
     qpos_array = np.concat(ls)
 
-    return qpos_array
-# qpos_array = qpos_array_original.copy()
-qpos_array = pad_front(qpos_array, pad_length=1.0)
+    ls = []
+    ls.append(np.tile(mpos_array[1], (keep_frame, 1)).reshape(keep_frame, model.nmocap, 3))
+    ls.append(mpos_array)
+    mpos_array = np.concat(ls)
 
-qpos_array.shape, qpos_array_original.shape
+    return qpos_array, mpos_array
+# qpos_array = qpos_array_original.copy()
+qpos_array_padded, mpos_array_padded = pad_front(qpos_array, mpos_array, pad_length=1.0)
+
  # %%
 for _ in range(1):
     height_list = []
     time_ = 0
-    for idx, qpos in enumerate(qpos_array):
+    for idx, qpos in enumerate(qpos_array_padded):
         if idx % 3 == 0:
-            agent.set_state(
-                time=time_
-            )
-            data.mocap_pos = np.array(agent.get_state().mocap_pos).reshape(-1, 3)
+            data.mocap_pos = mpos_array_padded[idx].reshape(-1, 3)
             data.qpos = qpos
             mujoco.mj_forward(model, data)
             viewer.render()
@@ -413,13 +409,13 @@ for _ in range(1):
 
 # %%
 from mjtools import qpos_index_from_names
-from motion_menagerie import get_MR_json_path, MotionIO
+# from motion_menagerie import get_MR_json_path, MotionIO
 
-motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array)
-motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True)
+motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_padded, mpos_array=mpos_array_padded)
+motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True, RENDER_EVERY=10)
 
 # %%
-qpos_array_save = qpos_array
+qpos_array_save = qpos_array_padded
 qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
 motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
 motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
@@ -459,8 +455,8 @@ def output_amp_motion(frames, out_filename, motion_weight, frame_duration):
 
   return True
 
-qpos_amp = qpos_array.copy()
-qpos_amp[:, [3,4,5,6]] = qpos_array[:, [4,5,6,3]]
+qpos_amp = qpos_array_save.copy()
+qpos_amp[:, [3,4,5,6]] = qpos_array_save[:, [4,5,6,3]]
 
 output_amp_motion(qpos_amp, f"amp_motion/{cfg.ROBOT}_{cfg.MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep)
 

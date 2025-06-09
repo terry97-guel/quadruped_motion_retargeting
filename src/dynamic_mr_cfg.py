@@ -7,7 +7,7 @@ import numpy as np
 
 class QuadrupedCfg:
     dataset = "STMR"
-    MOTION = "backflip3_long"
+    MOTION = "backflip2_long"
     SAVE = False
 
     ROBOT = "go1box3_task"

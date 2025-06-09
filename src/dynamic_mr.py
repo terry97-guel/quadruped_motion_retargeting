@@ -462,6 +462,6 @@ def output_amp_motion(frames, out_filename, motion_weight, frame_duration):
 qpos_amp = qpos_array.copy()
 qpos_amp[:, [3,4,5,6]] = qpos_array[:, [4,5,6,3]]
 
-output_amp_motion(qpos_amp, f"{cfg.ROBOT}_{cfg.MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep)
+output_amp_motion(qpos_amp, f"amp_motion/{cfg.ROBOT}_{cfg.MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep)
 
 # %%

@@ -277,6 +277,87 @@ for _ in range(1):
     print(max(height_list))
 
 # %%
+qpos_array_original = qpos_array.copy()
+
+# %%
+if cfg.SAVE:
+    def remove_hip_yaw_roll(qpos_array_original):
+        """Remove hip yaw and roll from qpos_array."""
+        qpos_array = qpos_array_original.copy()
+        qpos_array[:,[7,10,13,16]] = 0
+        from mjtools import quat2R, R2ypr, ypr2R, R2quat
+        quat_list = []
+        for quat in qpos_array[:,3:7]:
+            ypr = R2ypr(quat2R(quat))
+            # ypr[[0,2]] = 0
+
+            if -np.pi/2 < ypr[0] < np.pi/2:
+                ypr[0] = 0
+            else:
+                ypr[0] = np.pi
+
+            if -np.pi/2 < ypr[2] < np.pi/2:
+                ypr[2] = 0
+            else:
+                ypr[2] = np.pi
+
+            quat_list.append(R2quat(ypr2R(ypr)))
+        qpos_array[:,3:7] = np.array(quat_list)
+
+        temp = (qpos_array[:, 8] + qpos_array[:, 11])/2
+        qpos_array[:, 8] = temp
+        qpos_array[:, 11] = temp
+
+        temp = (qpos_array[:, 9] + qpos_array[:, 12])/2
+        qpos_array[:, 9] = temp
+        qpos_array[:, 12] = temp
+
+        temp = (qpos_array[:, 14] + qpos_array[:, 17])/2
+        qpos_array[:, 14] = temp
+        qpos_array[:, 17] = temp
+
+        temp = (qpos_array[:, 15] + qpos_array[:, 18])/2
+        qpos_array[:, 15] = temp
+        qpos_array[:, 18] = temp
+
+        return qpos_array
+
+    qpos_array_save = remove_hip_yaw_roll(qpos_array_original)
+    # qpos_array_save = qpos_array_save[::10]
+    
+    for qpos in qpos_array_save[::10]:
+        data.qpos = qpos
+        mujoco.mj_forward(model, data)
+        viewer.render()
+
+    from smr.task.Quadruped.info import QuadrupedSMRInfo
+
+    smr_info            = QuadrupedSMRInfo(model, data, only_foot=True)
+
+    # Save motion
+    from motion_menagerie import MotionIO, get_MR_json_path
+    from mjtools import qpos_index_from_names
+    cfg_MOTION = cfg.MOTION+"_iterated"
+    cfg.MR = "SMR"
+    # Save to xml file (for MJPC)
+    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
+
+    qpos_array_indexed = qpos_array_save.copy()
+    qpos_array_indexed[:,smr_info.id.base_qpos_adr[-1]:] = qpos_array_save[:,smr_info.id.base_qpos_adr[-1]:] - model.qpos0.copy()[smr_info.id.base_qpos_adr[-1]:]
+    qpos_array_indexed = qpos_array_indexed[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+    motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg_MOTION, cfg.MR)
+    motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=0.02)
+
+    motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg_MOTION, cfg.MR, dt=0.02, USE_FD=True)
+
+    # import os
+    # Exit python
+    # os._exit(1)
+
+# %%
+qpos_array = qpos_array_save.copy()
+    
+# %%
 # plot ctrl_array
 plt.figure()
 plt.plot(ctrl_array)
@@ -297,18 +378,18 @@ for idx in range(len(target_time_array)):
 
 # %%
 
-qpos_array_original = qpos_array.copy()
+# qpos_array_original = qpos_array.copy()
 # %%
 def pad_front(qpos_array, pad_length = 1.0):
     """Pad the front of the qpos_array with the first frame."""
     keep_frame = int(pad_length / model.opt.timestep) 
     ls = []
-    ls.append(np.tile(qpos_array_original[0], (keep_frame)).reshape(keep_frame,19))
-    ls.append(qpos_array_original)
+    ls.append(np.tile(qpos_array[0], (keep_frame)).reshape(keep_frame,19))
+    ls.append(qpos_array)
     qpos_array = np.concat(ls)
 
     return qpos_array
-qpos_array = qpos_array_original.copy()
+# qpos_array = qpos_array_original.copy()
 qpos_array = pad_front(qpos_array, pad_length=1.0)
 
 qpos_array.shape, qpos_array_original.shape

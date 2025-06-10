@@ -76,7 +76,7 @@ viewer.cam.azimuth = 90
 viewer.cam.elevation = -2
 
 from pathlib import Path
-save_name = f"output/{cfg.ROBOT}/{cfg.MOTION}"
+save_name = f"../output/{cfg.ROBOT}/{cfg.MOTION}"
 save_folder = Path(save_name)
 save_folder.mkdir(parents=True, exist_ok=True)
 
@@ -167,3 +167,5 @@ for img_path in images:
 
 video.release()
 print(f"Saved video to {video_path.resolve()}")
+
+# %%

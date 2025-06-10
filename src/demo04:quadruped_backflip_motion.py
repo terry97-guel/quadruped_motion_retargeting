@@ -21,7 +21,8 @@ from kinematic_mr_cfg import Go1Cfg as cfg
 # from kinematic_mr_cfg import cfg
 # from kinematic_mr_cfg import Go1box1Cfg as cfg
 # from kinematic_mr_cfg import Go1box2Cfg as cfg
-from kinematic_mr_cfg import Go1box3Cfg as cfg
+# from kinematic_mr_cfg import Go1box2Cfg as cfg
+from kinematic_mr_cfg import Go2box3Cfg as cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -33,10 +34,12 @@ elif cfg.ROBOT == "b2_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
 elif "go1box" in cfg.ROBOT:
     qpos0 = np.array([0, 0.9, -1.8]*4)
+elif "go2box" in cfg.ROBOT:
+    qpos0 = np.zeros(12)
 else:
     raise ValueError("Invalid Robot name")
 # %%
-cfg.MOTION = "backflip4_long"
+cfg.MOTION = "backflip3_long"
 PI = np.pi
 
 # Initalize Mujoco Model
@@ -192,19 +195,19 @@ qpos_list.append(qpos)
 contact_list.append([False, False, True, True])
 
 # %%
-extra_theta = np.pi * 1/7/5 + np.pi * 1/7
+extra_theta = np.pi * 1/7/3 + np.pi * 1/7
 theta_init = -np.pi * 2/7 
 # %%
 x = -0.5
 i = 1
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.45, 0., 0.52,
+    -0.45, 0., 0.45,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
-    0, -x *0.7, -x*2.0,
-    0, -x *0.7, -x*2.0])
+    0, -x *2/5, -x*1.2,
+    0, -x *2/5, -x*1.2])
 qpos[7:] += qpos0
 
 data.qpos = qpos
@@ -219,7 +222,7 @@ x = -0.5
 i = 2
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.55, 0., 0.52,
+    -0.55, 0., 0.54,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -239,7 +242,7 @@ x = -0.5
 i = 3
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.60, 0., 0.46,
+    -0.60, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -258,7 +261,7 @@ x = -0.5
 i = 4
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.64, 0., 0.48,
+    -0.64, 0., 0.64,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -277,7 +280,7 @@ x = -0.5
 i = 5
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.68, 0., 0.49,
+    -0.68, 0., 0.66,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, x * 0.5,
     0, x*1.5, x * 0.5,
@@ -297,7 +300,7 @@ x = -0.5
 i = 6
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.72, 0., 0.46,
+    -0.72, 0., 0.64,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -316,7 +319,7 @@ x = -0.5
 i = 7
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.76, 0., 0.40,
+    -0.76, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x*1.0,
     0, x*1.0, x*1.0,
@@ -335,7 +338,7 @@ x = -0.5
 i = 8
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.80, 0., 0.25,
+    -0.80, 0., 0.56,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0,  x, x*0,
     0,  x, x*0,
@@ -354,7 +357,7 @@ x = -0.3
 i = 9
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.84, 0., 0.10,
+    -0.84, 0., 0.45,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*0.4, -x,
     0, x*0.4, -x,
@@ -386,10 +389,10 @@ contact_list.append([False, False, False, False])
 # contact_list.append([True, True, False, False])
 
 # %%
-theta = -1/7
+theta = 0
 x = -0.5
 qpos = np.array([
-    -0.88, 0., 0.21,
+    -0.88, 0., 0.36,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*0.4, -x,
     0, x*0.4, -x,
@@ -444,15 +447,11 @@ for _ in range(3):
 qpos_array = np.array(qpos_list)
 contact_array = np.array(contact_list)
 
-hip_offset = 0.0
-qpos_array[:,[7, 13,]]  = +hip_offset
-qpos_array[:,[10, 16,]] = -hip_offset
-
 # %%
 for i in range(len(qpos_array)):
     data.qpos = qpos_array[i]
     mujoco.mj_forward(model, data)
-    for _ in range(2):
+    for _ in range(10):
         viewer.render()
 
 # %%
@@ -515,7 +514,7 @@ qpos_array_save = smr_agent.spatial_retarget_result[1:]
 for qpos in qpos_array_save:
     data.qpos = qpos
     mujoco.mj_forward(model, data)
-    for _ in range(5):
+    for _ in range(2):
         viewer.render()
 
 # %%
@@ -538,7 +537,7 @@ if cfg.ROBOT == "go1_task":
 elif "go1box" in cfg.ROBOT :
     dt = 0.040
     if "long" in cfg.MOTION:
-        dt = 0.050
+        dt = 0.060
 elif cfg.ROBOT == "b2_task":
     # dt = 0.040
     dt = 0.060

@@ -386,6 +386,15 @@ plt.plot(ctrl_array)
 plt.legend([f"ctrl_{i}" for i in range(model.nu)])
 
 # %%
+for idx, qpos in enumerate(qpos_array_post_processed):
+    if idx % 3 != 0:
+        continue
+    data.qpos = qpos
+    data.mocap_pos = mpos_array_padded[0].reshape(-1, 3)
+    mujoco.mj_forward(model, data)
+    viewer.render()
+
+# %%
 # plot target only
 for idx, mpos in enumerate(mpos_array):
     if idx % 10 == 0:
@@ -396,20 +405,18 @@ for idx, mpos in enumerate(mpos_array):
 # %%
 
 # qpos_array_original = qpos_array.copy()
-# %%
 
-# %%
-if not cfg.SAVE_ITERATE:
-    from mjtools import qpos_index_from_names
-    from motion_menagerie import get_MR_json_path, MotionIO
+# if not cfg.SAVE_ITERATE:
+#     from mjtools import qpos_index_from_names
+#     from motion_menagerie import get_MR_json_path, MotionIO
 
-    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_padded, mpos_array=mpos_array_padded)
-    motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True, RENDER_EVERY=10)
+#     motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_padded, mpos_array=mpos_array_padded)
+#     motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True, RENDER_EVERY=10)
 
-    qpos_array_save = qpos_array_padded
-    qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
-    motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
-    motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
+#     qpos_array_save = qpos_array_padded
+#     qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+#     motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
+#     motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
 
 
 # %%
@@ -446,9 +453,24 @@ def output_amp_motion(frames, out_filename, motion_weight, frame_duration):
 
   return True
 
-qpos_amp = qpos_array_save.copy()
-qpos_amp[:, [3,4,5,6]] = qpos_array_save[:, [4,5,6,3]]
+qpos_amp = qpos_array_post_processed.copy()
+qpos_amp[:, [3,4,5,6]] = qpos_array_post_processed.copy()[:, [4,5,6,3]]
+qpos_amp[:, 7:] = qpos_array_post_processed.copy()[:, 7:] - model.qpos0.copy()[7:]
 
-output_amp_motion(qpos_amp, f"amp_motion/{cfg.ROBOT}_{cfg_MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep)
+n_every = 5
+qpos_amp = qpos_amp[::n_every]
+
+output_amp_motion(qpos_amp, f"amp_motion/{cfg.ROBOT}_{cfg_MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep * n_every)
 
 # %%
+
+data.qpos = qpos_array_post_processed[0]
+data.qpos[0] += 0.1
+data.qpos[2] += 0.01
+mujoco.mj_forward(model, data)
+
+for i in range(1, qpos_array_post_processed.shape[0]):
+    data.ctrl = (qpos_array_post_processed[i, 7:] - data.qpos[7:]) * 30.0 - data.qvel[6:] * 0.0
+    mujoco.mj_step(model, data)
+    if i % 5 == 0:
+        viewer.render()

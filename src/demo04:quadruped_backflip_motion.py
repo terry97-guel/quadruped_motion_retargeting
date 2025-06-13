@@ -22,8 +22,9 @@ from kinematic_mr_cfg import Go1Cfg as cfg
 # from kinematic_mr_cfg import Go1box1Cfg as cfg
 # from kinematic_mr_cfg import Go1box2Cfg as cfg
 # from kinematic_mr_cfg import Go1box2Cfg as cfg
-from kinematic_mr_cfg import Go2box3Cfg as cfg
-# from kinematic_mr_cfg import Go2Cfg as cfg
+# from kinematic_mr_cfg import Go2box3Cfg as cfg
+from kinematic_mr_cfg import Go2Cfg as cfg
+
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -40,7 +41,7 @@ elif "go2box" in cfg.ROBOT:
 else:
     raise ValueError("Invalid Robot name")
 # %%
-cfg.MOTION = "backflip3_long"
+cfg.MOTION = "backflip4_long"
 PI = np.pi
 
 # Initalize Mujoco Model
@@ -196,8 +197,9 @@ qpos_list.append(qpos)
 contact_list.append([False, False, True, True])
 
 # %%
-extra_theta = np.pi * 1/7/3 + np.pi * 1/7
+extra_theta = np.pi * 1/7 *3/8 + np.pi * 1/7
 theta_init = -np.pi * 2/7 
+
 # %%
 x = -0.5
 i = 1
@@ -243,7 +245,7 @@ x = -0.5
 i = 3
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.60, 0., 0.60,
+    -0.60, 0., 0.56,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -262,7 +264,7 @@ x = -0.5
 i = 4
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.64, 0., 0.64,
+    -0.64, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -281,7 +283,7 @@ x = -0.5
 i = 5
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.68, 0., 0.66,
+    -0.68, 0., 0.62,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, x * 0.5,
     0, x*1.5, x * 0.5,
@@ -301,7 +303,7 @@ x = -0.5
 i = 6
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.72, 0., 0.64,
+    -0.72, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -320,7 +322,7 @@ x = -0.5
 i = 7
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.76, 0., 0.60,
+    -0.76, 0., 0.56,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x*1.0,
     0, x*1.0, x*1.0,
@@ -339,7 +341,7 @@ x = -0.5
 i = 8
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.80, 0., 0.56,
+    -0.80, 0., 0.52,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0,  x, x*0,
     0,  x, x*0,
@@ -358,7 +360,7 @@ x = -0.3
 i = 9
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.84, 0., 0.45,
+    -0.84, 0., 0.41,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*0.4, -x,
     0, x*0.4, -x,

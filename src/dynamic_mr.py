@@ -280,17 +280,17 @@ for _ in range(1):
 qpos_array_original = qpos_array.copy()
 
 # %%
-def pad_front(qpos_array, mpos_array, pad_length = 1.0):
+def pad_front(qpos_array, mpos_array, pad_length = 1.0, start_index=0):
     """Pad the front of the qpos_array with the first frame."""
-    keep_frame = int(pad_length / model.opt.timestep) 
+    keep_frame = int(pad_length / model.opt.timestep) + start_index
     ls = []
-    ls.append(np.tile(qpos_array[1], (keep_frame)).reshape(keep_frame,19))
-    ls.append(qpos_array)
+    ls.append(np.tile(qpos_array[start_index], (keep_frame)).reshape(keep_frame,19))
+    ls.append(qpos_array[start_index:])
     qpos_array = np.concat(ls)
 
     ls = []
-    ls.append(np.tile(mpos_array[1], (keep_frame, 1)).reshape(keep_frame, model.nmocap, 3))
-    ls.append(mpos_array)
+    ls.append(np.tile(mpos_array[start_index], (keep_frame, 1)).reshape(keep_frame, model.nmocap, 3))
+    ls.append(mpos_array[start_index:])
     mpos_array = np.concat(ls)
 
     for _ in range(1):
@@ -308,7 +308,7 @@ def pad_front(qpos_array, mpos_array, pad_length = 1.0):
         print(max(height_list))
     return qpos_array, mpos_array
 
-qpos_array_padded, mpos_array_padded = pad_front(qpos_array_original, mpos_array, pad_length=1.0)
+qpos_array_padded, mpos_array_padded = pad_front(qpos_array_original, mpos_array, pad_length=1.0, start_index=100)
 
 # %%
 if cfg.SAVE_ITERATE:
@@ -364,7 +364,7 @@ if cfg.SAVE_ITERATE:
     from motion_menagerie import MotionIO, get_MR_json_path
     from mjtools import qpos_index_from_names
     cfg_MOTION = cfg.MOTION+"_iterated"
-    cfg_MR = "SMR"
+    cfg_MR = "MJPC"
     # Save to xml file (for MJPC)
     motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_post_processed, mpos_array=mpos_array_padded)
 
@@ -404,19 +404,19 @@ for idx, mpos in enumerate(mpos_array):
 
 # %%
 
-# qpos_array_original = qpos_array.copy()
+qpos_array_original = qpos_array.copy()
 
-# if not cfg.SAVE_ITERATE:
-#     from mjtools import qpos_index_from_names
-#     from motion_menagerie import get_MR_json_path, MotionIO
+if not cfg.SAVE_ITERATE:
+    from mjtools import qpos_index_from_names
+    from motion_menagerie import get_MR_json_path, MotionIO
 
-#     motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_padded, mpos_array=mpos_array_padded)
-#     motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True, RENDER_EVERY=10)
+    motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_padded, mpos_array=mpos_array_padded)
+    motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR, dt=model.opt.timestep, USE_FD=True, RENDER_EVERY=10)
 
-#     qpos_array_save = qpos_array_padded
-#     qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
-#     motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
-#     motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
+    qpos_array_save = qpos_array_padded
+    qpos_array_indexed = qpos_array_save[:, qpos_index_from_names(model, cfg.crl_joint_orders)]
+    motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
+    motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep)
 
 
 # %%
@@ -457,7 +457,7 @@ qpos_amp = qpos_array_post_processed.copy()
 qpos_amp[:, [3,4,5,6]] = qpos_array_post_processed.copy()[:, [4,5,6,3]]
 qpos_amp[:, 7:] = qpos_array_post_processed.copy()[:, 7:] - model.qpos0.copy()[7:]
 
-n_every = 5
+n_every = 1
 qpos_amp = qpos_amp[::n_every]
 
 output_amp_motion(qpos_amp, f"amp_motion/{cfg.ROBOT}_{cfg_MOTION}.txt", motion_weight=1, frame_duration= model.opt.timestep * n_every)

@@ -162,9 +162,9 @@ contact_list.append([True, True, True, True])
 
 # %%
 x = -0.5
-theta = -np.pi/8
+theta = -np.pi * 3/16
 qpos = np.array([
-    -0.27, 0., 0.34,
+    -0.27, 0., 0.38,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x, -x,
     0, x, -x,
@@ -180,9 +180,9 @@ contact_list.append([False, False, True, True])
 
 # %%
 x = -0.5
-theta = -np.pi * 2/7
+theta = -np.pi * 6/16
 qpos = np.array([
-    -0.30, 0., 0.43,
+    -0.30, 0., 0.50,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, -0,
     0, x*1.5, -0,
@@ -194,18 +194,18 @@ data.qpos = qpos
 mujoco.mj_forward(model, data)
 viewer.render()
 qpos_list.append(qpos)
-contact_list.append([False, False, True, True])
+contact_list.append([False, False, False, False])
 
 # %%
-extra_theta = np.pi * 1/7 *3/8 + np.pi * 1/7
-theta_init = -np.pi * 2/7 
+extra_theta = np.pi * 3/16
+theta_init = -np.pi * 6/16
 
 # %%
 x = -0.5
 i = 1
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.45, 0., 0.45,
+    -0.42, 0., 0.55,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -217,7 +217,7 @@ data.qpos = qpos
 mujoco.mj_forward(model, data)
 viewer.render()
 qpos_list.append(qpos)
-contact_list.append([False, False, True, True])
+contact_list.append([False, False, False, False])
 
 
 # %%
@@ -225,7 +225,7 @@ x = -0.5
 i = 2
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.55, 0., 0.54,
+    -0.49, 0., 0.58,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -237,7 +237,7 @@ data.qpos = qpos
 mujoco.mj_forward(model, data)
 viewer.render()
 qpos_list.append(qpos)
-contact_list.append([False, False, True, True])
+contact_list.append([False, False, False, False])
 
 
 # %%
@@ -245,7 +245,7 @@ x = -0.5
 i = 3
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.60, 0., 0.56,
+    -0.51, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -264,7 +264,7 @@ x = -0.5
 i = 4
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.64, 0., 0.60,
+    -0.52, 0., 0.61,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*2.0, -x,
     0, x*2.0, -x,
@@ -283,7 +283,7 @@ x = -0.5
 i = 5
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.68, 0., 0.62,
+    -0.53, 0., 0.60,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.5, x * 0.5,
     0, x*1.5, x * 0.5,
@@ -303,7 +303,7 @@ x = -0.5
 i = 6
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.72, 0., 0.60,
+    -0.54, 0., 0.58,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x,
     0, x*1.0, x,
@@ -322,7 +322,7 @@ x = -0.5
 i = 7
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.76, 0., 0.56,
+    -0.55, 0., 0.54,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*1.0, x*1.0,
     0, x*1.0, x*1.0,
@@ -341,7 +341,7 @@ x = -0.5
 i = 8
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.80, 0., 0.52,
+    -0.60, 0., 0.50,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0,  x, x*0,
     0,  x, x*0,
@@ -360,7 +360,7 @@ x = -0.3
 i = 9
 theta = theta_init - extra_theta * i
 qpos = np.array([
-    -0.84, 0., 0.41,
+    -0.61, 0., 0.38,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*0.4, -x,
     0, x*0.4, -x,
@@ -395,7 +395,7 @@ contact_list.append([False, False, False, False])
 theta = 0
 x = -0.5
 qpos = np.array([
-    -0.88, 0., 0.36,
+    -0.62, 0., 0.36,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x*0.4, -x,
     0, x*0.4, -x,
@@ -413,7 +413,7 @@ contact_list.append([True, True, False, False])
 theta = -np.pi * 14/7
 x = 0.0
 qpos = np.array([
-    -0.88, 0., 0.28,
+    -0.62, 0., 0.28,
     np.cos(theta/2), 0., np.sin(theta/2), 0.,
     0, x, -x,
     0, x, -x,
@@ -431,7 +431,7 @@ for _ in range(5):
 
 # %%
 qpos = np.array([
-    -0.88, 0., 0.26,
+    -0.62, 0., 0.26,
     1., 0., 0., 0.,
     0, 0, 0,
     0, 0, 0,

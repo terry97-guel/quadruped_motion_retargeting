@@ -22,7 +22,8 @@ from kinematic_mr_cfg import Go1Cfg as cfg
 # from kinematic_mr_cfg import Go1box1Cfg as cfg
 # from kinematic_mr_cfg import Go1box2Cfg as cfg
 # from kinematic_mr_cfg import Go1box2Cfg as cfg
-from kinematic_mr_cfg import Go2box3Cfg as cfg
+from kinematic_mr_cfg import Go2box2Cfg as cfg
+# from kinematic_mr_cfg import Go2box3Cfg as cfg
 # from kinematic_mr_cfg import Go2Cfg as cfg
 
 if cfg.ROBOT == "go1_task":

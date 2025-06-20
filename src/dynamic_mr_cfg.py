@@ -7,7 +7,7 @@ import numpy as np
 
 class QuadrupedCfg:
     dataset = "STMR"
-    MOTION = "backflip2" 
+    MOTION = "backflip2_tmr"
 
     ROBOT = "b2_task"
     # ROBOT = "go1_task"
@@ -23,7 +23,7 @@ class QuadrupedCfg:
         MOTION_BASE_PATH = STMR_BASE_PATH
     else:
         raise ValueError("Invalid dataset")
-    
+
     MR = "MJPC"
 
     foot_info_dict = {
@@ -33,12 +33,23 @@ class QuadrupedCfg:
         "rl": {"site_name": "RL_foot_site", "geom_names": ["RL_foot"]},
     }
 
-
-    crl_joint_orders = ["trunk",
-                "FL_hip_joint", "FR_hip_joint", "RR_hip_joint", "RL_hip_joint",
-                "FL_thigh_joint", "FR_thigh_joint", "RR_thigh_joint", "RL_thigh_joint",
-                "FL_calf_joint", "FR_calf_joint", "RR_calf_joint", "RL_calf_joint"]
+    crl_joint_orders = [
+        "trunk",
+        "FL_hip_joint",
+        "FR_hip_joint",
+        "RR_hip_joint",
+        "RL_hip_joint",
+        "FL_thigh_joint",
+        "FR_thigh_joint",
+        "RR_thigh_joint",
+        "RL_thigh_joint",
+        "FL_calf_joint",
+        "FR_calf_joint",
+        "RR_calf_joint",
+        "RL_calf_joint",
+    ]
 
     motion_info_from_path = get_MR_info_path(MOTION_BASE_PATH, ROBOT, "SMR").resolve()
+
 
 cfg = QuadrupedCfg

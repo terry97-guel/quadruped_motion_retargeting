@@ -7,11 +7,13 @@ import numpy as np
 
 class QuadrupedCfg:
     dataset = "STMR"
-    MOTION = "backflip4_long"
+    # MOTION = "backflip2_long"
+    # MOTION = "backflip3_long"
+    MOTION = "backflip3_long_iterated"
     SAVE = False
 
-    ROBOT = "go2_task"
-    # ROBOT = "go1_task"
+    ROBOT = "go2box3_task"
+    # ROBOT = "go1_task"1
     # ROBOT = "go2_task"
     ROBOT_CLASS = "Quadruped"
     # MOTION = "D1_007_KAN01_001"

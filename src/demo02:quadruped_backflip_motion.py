@@ -13,6 +13,7 @@ import argparse
 
 from smr.agent import SMR
 from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
+from motion_menagerie import MotionIO, get_MR_json_path
 
 # from quadruped_walking_config import CustomCfg as cfg
 from mjtools import qpos_index_from_names
@@ -21,7 +22,7 @@ from kinematic_mr_cfg import Go1Cfg as cfg
 # from kinematic_mr_cfg import cfg
 # from kinematic_mr_cfg import Go1box1Cfg as cfg
 # from kinematic_mr_cfg import Go1box2Cfg as cfg
-from kinematic_mr_cfg import Go1box3Cfg as cfg
+# from kinematic_mr_cfg import Go1box3Cfg as cfg
 
 if cfg.ROBOT == "go1_task":
     qpos0 = np.array([0, 0.9, -1.8]*4)
@@ -440,6 +441,11 @@ for i in range(len(qpos_array)):
     for _ in range(10):
         viewer.render()
 
+# motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array)
+# motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, "SRC")
+# motion_json_path = motion_io.export_json(motion_json_path, cfg.foot_info_dict, qpos_array, dt=cfg.dt)
+# motion_io.smart_export_xml(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, "SRC", dt=cfg.dt, USE_FD=True)
+
 # %%
 # viewer._paused = True
 viewer.render()
@@ -505,7 +511,6 @@ for qpos in qpos_array_save:
 
 # %%
 # Save motion
-from motion_menagerie import MotionIO, get_MR_json_path
 # Save to xml file (for MJPC)
 motion_io = MotionIO(model, data, viewer).set_qpos(qpos_array_save)
 

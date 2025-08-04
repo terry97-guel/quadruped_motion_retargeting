@@ -49,6 +49,20 @@ with open(cfg.motion_info_from_path, "r") as f:
     motion_info = json.load(f)
 
 # %%
+from mjtools import qpos_index_from_names
+from motion_menagerie import get_MR_json_path, MotionIO
+
+qpos_array_save = motion_read.qpos_array.copy()
+qpos_array_indexed = qpos_array_save[
+    :, qpos_index_from_names(model, cfg.crl_joint_orders)
+]
+motion_json_path = get_MR_json_path(cfg.MOTION_BASE_PATH, cfg.ROBOT, cfg.MOTION, cfg.MR)
+motion_json_path = motion_read.export_json(
+    motion_json_path, cfg.foot_info_dict, qpos_array_indexed, dt=model.opt.timestep
+)
+
+
+# %%
 # for _ in range(10):
 #     plot_robot(viewer=viewer, model=model, data=data, qpos_array=motion_read.qpos_array, lookat_site_idr=smr_info.id.trunk_site, sphere_site_ids=smr_info.id.foot_ids, PLOT_EVERY=10)
 
@@ -130,21 +144,21 @@ for i in tqdm(range(0, len(motion_read.qpos_array), 10)):
     mujoco.mj_forward(model, data)
     viewer.render()
 
-    img = grab_image(viewer, resize_rate=1.0)
+    # img = grab_image(viewer, resize_rate=1.0)
 
-    # plot with matplotlib
-    plt.figure(figsize=(viewer_size[0], viewer_size[1]), dpi=1)
-    plt.imshow(img)
-    plt.axis("off")
-    # remove white space
-    plt.gca().xaxis.set_major_locator(plt.NullLocator())
-    plt.gca().yaxis.set_major_locator(plt.NullLocator())
-    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-    plt.margins(0, 0)
+    # # plot with matplotlib
+    # plt.figure(figsize=(viewer_size[0], viewer_size[1]), dpi=1)
+    # plt.imshow(img)
+    # plt.axis("off")
+    # # remove white space
+    # plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    # plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    # plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    # plt.margins(0, 0)
 
-    # save image
-    plt.savefig(save_folder / f"{i:04d}.png")
-    plt.close()
+    # # save image
+    # plt.savefig(save_folder / f"{i:04d}.png")
+    # plt.close()
 
 # %%
 # Save to video

@@ -24,7 +24,7 @@ class QuadrupedCfg:
     else:
         raise ValueError("Invalid dataset")
 
-    MR = "MJPC"
+    MR = "SMR"
 
     foot_info_dict = {
         "fr": {"site_name": "FR_foot_site", "geom_names": ["FR_foot"]},

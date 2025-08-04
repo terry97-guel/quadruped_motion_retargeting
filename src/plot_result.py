@@ -29,18 +29,7 @@ try:
     viewer.close()
 except Exception:
     pass
-viewer = mujoco_viewer.MujocoViewer(
-    model,
-    data,
-    mode="window",
-    title="MPC",
-    width=1920,
-    height=1080,
-    hide_menus=True,
-)
 
-viewer.cam.lookat = data.qpos[:3]
-viewer.render()
 
 # %%
 from smr.ik_target_holder import IKTargetHolder, TimeStampedTarget
@@ -52,7 +41,7 @@ smr_info = QuadrupedSMRInfo(model, data, only_foot=True)
 from motion_menagerie import MotionIO
 
 motion_xml_path = cfg.MOTION_BASE_PATH / f"{cfg.MR}/{cfg.ROBOT}/xml/{cfg.MOTION}.xml"
-motion_read = MotionIO(model, data, viewer).read_motion_xml(motion_xml_path)
+motion_read = MotionIO(model, data, None).read_motion_xml(motion_xml_path)
 
 import json
 
@@ -84,11 +73,45 @@ def grab_image(viewer, resize_rate=None, interpolation=cv2.INTER_NEAREST):
 
 
 # %%
-lookat_site_idr = smr_info.id.trunk_site
-viewer.cam.distance = 3.7
-viewer.cam.azimuth = 90
-viewer.cam.elevation = -2
+cam_pos = (
+    motion_read.qpos_array[0, :3].copy() + motion_read.qpos_array[-1, :3].copy()
+) / 2
 
+if "b2" in cfg.ROBOT:
+    cam_distance = 3.7
+    viewer_size = (1920, 1080)
+    cam_pos[2] += 0.6
+    elevation = 5
+
+
+elif "go" in cfg.ROBOT:
+    cam_distance = 2.8
+    cam_pos[2] += 0.6
+    # viewer_size = (1920, 1080 // 2)
+    viewer_size = (1920, 1080)
+    elevation = 5
+
+try:
+    viewer.close()
+except Exception:
+    pass
+
+viewer = mujoco_viewer.MujocoViewer(
+    model,
+    data,
+    mode="window",
+    title="MPC",
+    width=viewer_size[0],
+    height=viewer_size[1],
+    hide_menus=True,
+)
+
+viewer.cam.lookat = cam_pos
+viewer.cam.azimuth = 90
+viewer.cam.elevation = elevation
+viewer.cam.distance = cam_distance
+viewer.render()
+# %%
 from pathlib import Path
 
 save_name = f"output/{cfg.ROBOT}"
@@ -99,10 +122,6 @@ data.mocap_pos[:] = 10
 
 from tqdm.notebook import tqdm
 
-cam_pos = (
-    motion_read.qpos_array[0, :3].copy() + motion_read.qpos_array[-1, :3].copy()
-) / 2
-viewer.cam.lookat = cam_pos
 
 for i in tqdm(range(0, len(motion_read.qpos_array), 10)):
     qpos = motion_read.qpos_array[i]
@@ -114,7 +133,7 @@ for i in tqdm(range(0, len(motion_read.qpos_array), 10)):
     img = grab_image(viewer, resize_rate=1.0)
 
     # plot with matplotlib
-    plt.figure()
+    plt.figure(figsize=(viewer_size[0], viewer_size[1]), dpi=1)
     plt.imshow(img)
     plt.axis("off")
     # remove white space
@@ -144,7 +163,7 @@ def save_video_from_images(image_folder, video_path, fps):
     # Get the size of the first image
     first_image = cv2.imread(str(images[0]))
     height, width, layers = first_image.shape
-
+    print(f"Image size: {width}x{height}")
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # or use 'XVID'
     out = cv2.VideoWriter(video_path, fourcc, fps, (width, height))
